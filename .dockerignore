@@ -9,3 +9,4 @@ deploy/secrets
 test-results
 playwright-report
 .npm-cache
+.venv

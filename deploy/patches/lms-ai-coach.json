@@ -1,0 +1,14 @@
+{
+  "frontend/src/utils/index.js": {
+    "before": "7f2cb755b09378ba79f3a6bcd7d40774538ad104699b8a3239d35d8728bfa404",
+    "after": "215127f07a8d3385498f2ffd44507fc9b842ccef26988f452af21107d2de806e"
+  },
+  "frontend/src/routes.js": {
+    "before": "2d81031516d68fbd63df9d0e6b86be854935428995f65100a13b233f4d347c75",
+    "after": "ff097e9d354322818f6a4cc55cffa86d76788fb1edae28283c93687c6c2de2d7"
+  },
+  "frontend/src/utils/mobileNav.ts": {
+    "before": "9354f0b1ed848d087e8fa8d100dc06f8afd48b060055126a8bf91b3d2296e37d",
+    "after": "1069051f36937eaa2e42a16b0c71cb528c93e8da174a2783679462e93d109162"
+  }
+}

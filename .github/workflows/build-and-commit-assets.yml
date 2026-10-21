@@ -16,6 +16,7 @@ permissions:
 
 jobs:
   build-assets:
+    if: github.repository == 'frappe/lms'
     name: Build assets and upload to release
     runs-on: ubuntu-latest
     env:

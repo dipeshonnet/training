@@ -8,6 +8,7 @@ on:
       - "*"
 jobs:
   build:
+    if: github.repository == 'frappe/lms'
     name: Build
     runs-on: ubuntu-latest
 

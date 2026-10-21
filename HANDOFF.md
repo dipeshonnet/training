@@ -4,6 +4,16 @@ Updated: 21 October 2026 (Asia/Kolkata).
 
 ## Status: unfinished development checkpoint
 
+### Continuation milestone (21 October 2026)
+
+- Added the missing version-specific LMS bridge patch and source hashes. The image build now registers `ai_coach` in the shared EditorJS tools, plus authenticated desktop/mobile navigation. Patch tests verify the pinned upstream sources, repeat application, and rejection of drift or a partial patch. Native interaction/build verification is still pending CI.
+- Asset export now follows Bench symlinks into real files before the Nginx image copy. Fixed private-file routing to include the site directory and request Frappe's authenticated `X-Accel-Redirect` response. Added public-file routing with a restrictive content policy. Actual Nginx/file checks await Docker CI.
+- Initialization now resumes individual app installs, migrates explicitly, and preserves extra common configuration. Required roles are created before custom DocType sync. Migration can finish interrupted initial defaults without resetting later administrator changes.
+- Added custom EditorJS tests, deployment contract tests, pinned native frontend CI, and a Docker foundation workflow covering initialization, file/login probes, restart recovery and native LMS server tests. Inherited release/image publication jobs are restricted to `frappe/lms`; this fork needs its own verified release workflow before publishing images.
+- Local checks: 13 Python rules/install tests, 7 deployment tests and 4 frontend bridge tests pass; one real symlink-export test is skipped because this Windows account cannot create symlinks. Custom production build and source compilation pass. Local Python is the bundled 3.12.14, so this does not verify the target Python 3.14 runtime; CI uses 3.14. No Docker executable/engine is available here. Native, Linux symlink and Docker gates are not yet recorded as passed.
+
+Continue with the CI results for this milestone, then the remaining native access-control and feature gates below. No public deployment or verified release is authorized by a successful unit test run alone.
+
 This commit preserves implementation work so development can continue on a working Docker host. **Do not treat it as a completed, secure or deployable release.** No site has been initialized, no training data migrated, no Cloudflare Tunnel configured, no GHCR image published, and no verified release tag created.
 
 The upstream LMS code is based on the released `v2.66.0` tag, not the previous development fork. Existing `develop` history remains separate. Work is on `ai-coach-v2` in `https://github.com/dipeshonnet/training`.
@@ -76,18 +86,18 @@ Observed before handoff:
 - Python source compilation passes.
 - Native LMS/Frappe tests, frontend interaction tests, browser/microphone tests, live Groq checks and load tests have **not** run against this implementation.
 
-The custom frontend's `npm test` script exists, but no custom frontend tests have been authored yet. A successful production build is not a substitute for those tests.
+The custom frontend now has four EditorJS bridge tests. Run `npm test` as well as `npm run build`. The microphone, builder, simulation and SOP interaction tests remain outstanding. Run deployment contract checks with `python -m unittest discover -s deploy -p 'test_*.py' -v`; the patch tests need the pinned LMS commit available in Git history.
 
 The parity fixture is committed and does not require the original pilot checkout to run. `deploy/generate_parity.mjs` is a developer utility that needs the original pilot source path if regenerating fixtures; do not regenerate expected outputs to hide a scoring regression.
 
 ## 4. Fix these blockers before trying to deploy
 
-1. **Missing LMS integration patch:** `deploy/apply_bridge.py` expects `deploy/patches/lms-ai-coach.patch`, which has not been created. The Docker build currently cannot complete. Implement and test the small, version-specific patch to register `ai_coach` in native EditorJS authoring/rendering and expose AI Coach navigation. The tool implementation exists at `apps/bpo_coach/frontend/src/bridge.js`.
+1. **LMS integration needs native verification:** the missing `deploy/patches/lms-ai-coach.patch` is implemented and tested against the pinned sources. Verify the patched native frontend CI and actual EditorJS authoring/rendering and navigation in a live site. The tool implementation is `apps/bpo_coach/frontend/src/bridge.js`.
 2. **Native access paths need integration coverage:** custom API scope checks and Frappe hooks are initial code only. Audit and test native LMS whitelisted methods, SQL/search/report paths, direct document writes and file access; do not assume document hooks cover queries that bypass them. Tighten any scope bypasses before public exposure.
-3. **Docker asset handling:** Bench's asset directory can contain symlinks. Review the Dockerfile's asset copy into the Nginx image and materialize the targets where needed. Test native LMS and custom-app assets and private-file `X-Accel-Redirect` routing.
+3. **Docker asset handling needs execution:** asset export now materializes symlink targets, and Nginx routes private files through the site directory. Run the Linux symlink test and Docker HTTP probes for native/custom assets, guest denial, authenticated private-file retrieval and internal-route denial.
 4. **Frappe install/bootstrap needs execution:** verify custom DocTypes and roles sync in the correct order, separate app installation, `after_migrate`, native batch/course required fields and enrollment behaviour against the pinned versions. Confirm the Bench command options and dependencies during an actual build.
 5. **Missing operational features:** encrypted backup/restore and R2 upload tooling, portable setup/upgrade commands, the read-only pilot exporter/importer, verified release-image publication and digest recording are not implemented. Import/reminder record metadata alone is not an importer.
-6. **CI remains partial:** the checkpoint workflow runs pure rules tests and the custom frontend build. Review/replace inherited upstream release workflows on this branch and add Docker, native LMS, integration and browser gates before enabling release publication.
+6. **CI remains partial:** checkpoint CI now includes rules/install/deployment/bridge tests and a patched native frontend test/build. Docker foundation CI was added but has not been verified yet. Browser, full native permission integration and release publication gates remain outstanding. Inherited upstream release/image jobs have fork guards.
 
 Other targeted follow-ups:
 

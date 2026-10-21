@@ -6,6 +6,7 @@ on:
 
 jobs:
   assets:
+    if: github.repository == 'frappe/lms'
     name: Pre-build assets
     uses: frappe/pilot/.github/workflows/app-assets.yml@develop
     with:

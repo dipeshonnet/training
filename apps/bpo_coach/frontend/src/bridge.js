@@ -1,6 +1,12 @@
 // EditorJS bridge copied into the pinned LMS frontend during the image build.
 export class AICoach {
-  constructor({data,readOnly}) {this.data=data||{};this.readOnly=readOnly}
+  constructor({data,readOnly}) {
+    this.data={
+      version:typeof data?.version==='string'?data.version.trim():'',
+      channels:Array.isArray(data?.channels)?[...new Set(data.channels.filter(channel=>['workflow','chat','voice'].includes(channel)))]:[],
+    }
+    this.readOnly=readOnly
+  }
   static get toolbox(){return {title:'AI Coach',icon:'<svg viewBox="0 0 24 24" width="18" height="18"><path d="M4 4h16v12H9l-5 4z" fill="none" stroke="currentColor"/></svg>'}}
   static get isReadOnlySupported(){return true}
   render(){
@@ -18,6 +24,6 @@ export class AICoach {
     }
     return wrapper
   }
-  save(){return {version:this.data.version,channels:this.data.channels||[]}}
-  validate(data){return Boolean(data.version&&data.channels?.length)}
+  save(){return {version:this.data.version,channels:[...this.data.channels]}}
+  validate(data){return Boolean(typeof data?.version==='string'&&data.version.trim()&&Array.isArray(data.channels)&&data.channels.length&&data.channels.every(channel=>['workflow','chat','voice'].includes(channel)))}
 }

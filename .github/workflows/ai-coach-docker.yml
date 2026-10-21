@@ -1,0 +1,61 @@
+name: AI Coach Docker foundation
+on:
+  push:
+    branches: [ai-coach-v2]
+    paths:
+      - 'deploy/**'
+      - 'apps/bpo_coach/**'
+      - '.github/workflows/ai-coach-docker.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      SITE_HOSTNAME: training.everydayai.work
+      # Disposable CI database only; no provider credentials or public tunnel.
+      DB_ROOT_PASSWORD: ci-disposable-root-password
+      ADMIN_PASSWORD: ci-disposable-admin-password
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Compose and build both image targets
+        run: |
+          docker compose -f deploy/compose.yaml config --quiet
+          docker compose -f deploy/compose.yaml build backend frontend
+      - name: Initialize a disposable site and start services
+        run: docker compose -f deploy/compose.yaml up --no-build -d --wait --wait-timeout 600
+      - name: Verify native and custom assets through Nginx
+        run: |
+          curl --fail --silent --show-error -H "Host: $SITE_HOSTNAME" http://127.0.0.1:8080/api/method/ping
+          curl --fail --silent --show-error -H "Host: $SITE_HOSTNAME" http://127.0.0.1:8080/assets/lms/frontend/index.html -o /dev/null
+          curl --fail --silent --show-error -H "Host: $SITE_HOSTNAME" http://127.0.0.1:8080/assets/bpo_coach/coach/main.js -o /dev/null
+          test "$(curl --silent -o /dev/null -w '%{http_code}' -H "Host: $SITE_HOSTNAME" http://127.0.0.1:8080/protected/private/files/example.png)" = 404
+          docker compose -f deploy/compose.yaml exec -T backend bench --site "$SITE_HOSTNAME" list-apps
+      - name: Verify public and private file routing with a real session
+        run: |
+          docker compose -f deploy/compose.yaml exec -T backend bench --site "$SITE_HOSTNAME" execute frappe.utils.file_manager.save_file --kwargs '{"fname":"ci-private-probe.txt","content":"ci-private-probe","is_private":1}'
+          docker compose -f deploy/compose.yaml exec -T backend bench --site "$SITE_HOSTNAME" execute frappe.utils.file_manager.save_file --kwargs '{"fname":"ci-public-probe.txt","content":"ci-public-probe","is_private":0}'
+          python deploy/smoke_http.py
+      - name: Repeat initialization and verify restart recovery
+        run: |
+          docker compose -f deploy/compose.yaml run --rm --no-deps initialize
+          docker compose -f deploy/compose.yaml restart backend worker scheduler websocket frontend
+          docker compose -f deploy/compose.yaml up --no-build -d --wait --wait-timeout 120
+          curl --fail --silent --show-error -H "Host: $SITE_HOSTNAME" http://127.0.0.1:8080/api/method/ping
+      - name: Run native LMS server tests on the pinned stack
+        run: |
+          docker compose -f deploy/compose.yaml exec -T backend bench --site "$SITE_HOSTNAME" set-config allow_tests true
+          docker compose -f deploy/compose.yaml exec -T backend bench --site "$SITE_HOSTNAME" run-tests --app lms
+      - name: Show diagnostics
+        if: always()
+        run: |
+          docker compose -f deploy/compose.yaml ps -a
+          docker compose -f deploy/compose.yaml logs --tail 100 initialize backend frontend worker scheduler
+      - name: Remove disposable CI resources
+        if: always()
+        run: docker compose -f deploy/compose.yaml down --volumes --remove-orphans

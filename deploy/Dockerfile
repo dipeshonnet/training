@@ -13,7 +13,7 @@ RUN bench get-app --branch version-16 --skip-assets https://github.com/frappe/pa
 COPY --chown=frappe:frappe . apps/lms
 RUN cp -a apps/lms/apps/bpo_coach apps/bpo_coach && env/bin/pip install -e apps/lms -e apps/bpo_coach && printf 'frappe\npayments\nlms\nbpo_coach\n' > sites/apps.txt && python apps/lms/deploy/apply_bridge.py && cd apps/lms && yarn install --frozen-lockfile
 RUN cd apps/bpo_coach/frontend && npm ci && npm run build
-RUN bench build --production && cp -a sites/assets /home/frappe/assets-built
+RUN bench build --production && python apps/lms/deploy/materialize_assets.py sites/assets /home/frappe/assets-built
 COPY --chown=frappe:frappe deploy/entrypoint.py /home/frappe/entrypoint.py
 ENTRYPOINT ["python", "/home/frappe/entrypoint.py"]
 CMD ["web"]

@@ -1,0 +1,59 @@
+--- a/frontend/src/utils/index.js
++++ b/frontend/src/utils/index.js
+@@ -1,5 +1,6 @@
+ import { call, toast } from 'frappe-ui'
+ import { Quiz } from '@/utils/quiz'
++import { AICoach } from '@/utils/aiCoach'
+ import { Program } from '@/utils/program'
+ import { Assignment } from '@/utils/assignment'
+ import { Upload } from '@/utils/upload'
+@@ -163,6 +164,7 @@
+ 			class: Table,
+ 			inlineToolbar: INLINE_TOOLBAR_ORDER,
+ 		},
++		ai_coach: AICoach,
+ 		quiz: Quiz,
+ 		// The submission renders in an iframe (a separate app instance), so
+ 		// provide/inject can't reach it. Pass Student View through the tool
+@@ -523,6 +525,13 @@
+ 			hideLabel: true,
+ 			items: [
+ 				{
++					label: 'AI Coach',
++					icon: 'MessageCircle',
++					to: 'AICoach',
++					activeFor: ['AICoach'],
++					condition: () => Boolean(userResource?.data),
++				},
++				{
+ 					label: 'Courses',
+ 					icon: 'BookOpen',
+ 					to: 'Courses',
+--- a/frontend/src/routes.js
++++ b/frontend/src/routes.js
+@@ -5,6 +5,15 @@
+ // memory history, rather than a copy that could drift from what router.js
+ // actually registers.
+ export const routes = [
++	{
++		path: '/ai-coach',
++		name: 'AICoach',
++		component: { render: () => null },
++		beforeEnter: () => {
++			window.location.assign('/coach')
++			return false
++		},
++	},
+ 	{
+ 		path: '/',
+ 		name: 'Home',
+--- a/frontend/src/utils/mobileNav.ts
++++ b/frontend/src/utils/mobileNav.ts
+@@ -71,6 +71,7 @@
+ 
+ const SECTION_MAP: Record<string, readonly string[]> = {
+ 	LEARN: [
++		'AI Coach',
+ 		'Programs',
+ 		'Batches',
+ 		'Quizzes',

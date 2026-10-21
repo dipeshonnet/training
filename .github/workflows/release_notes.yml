@@ -21,6 +21,7 @@ permissions:
 
 jobs:
   regen-notes:
+    if: github.repository == 'frappe/lms'
     name: 'Regenerate release notes'
     runs-on: ubuntu-latest
 

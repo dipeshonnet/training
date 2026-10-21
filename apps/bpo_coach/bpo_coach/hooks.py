@@ -5,6 +5,7 @@ app_description = 'Internal BPO training and AI simulations'
 app_email = 'admin@everydayai.work'
 app_license = 'AGPL-3.0-or-later'
 required_apps = ['lms']
+before_install = 'bpo_coach.install.ensure_roles'
 after_install = 'bpo_coach.install.after_install'
 after_migrate = 'bpo_coach.install.after_migrate'
 before_request = ['bpo_coach.permissions.before_request']

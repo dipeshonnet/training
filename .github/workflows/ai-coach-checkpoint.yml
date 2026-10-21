@@ -37,6 +37,8 @@ jobs:
         run: yarn test
       - name: Build patched native frontend
         working-directory: apps/lms
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
         run: yarn build
   rules-and-frontend:
     runs-on: ubuntu-latest

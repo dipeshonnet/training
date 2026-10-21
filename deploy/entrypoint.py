@@ -15,7 +15,8 @@ def run(*args):
 def initialize(root, site, assets, environ):
     config = {'db_host': 'db', 'db_port': 3306, 'redis_cache': 'redis://redis-cache:6379',
               'redis_queue': 'redis://redis-queue:6379', 'redis_socketio': 'redis://redis-queue:6379',
-              'socketio_port': 9000, 'default_site': site, 'serve_default_site': True}
+              'socketio_port': 9000, 'socketio_backend_url': 'http://backend:8000',
+              'default_site': site, 'serve_default_site': True}
     config_path = root / 'sites/common_site_config.json'
     existing = json.loads(config_path.read_text()) if config_path.exists() else {}
     existing.update(config)

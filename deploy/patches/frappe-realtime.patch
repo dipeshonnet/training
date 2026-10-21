@@ -1,0 +1,26 @@
+diff --git a/realtime/utils.js b/realtime/utils.js
+--- a/realtime/utils.js
++++ b/realtime/utils.js
+@@ -4,6 +4,10 @@
+ function get_url(socket, path) {
+ 	if (!path) {
+ 		path = "";
++	}
++	// Use a server-owned internal address behind the reverse proxy.
++	if (conf.socketio_backend_url) {
++		return conf.socketio_backend_url.replace(/\/$/, "") + path;
+ 	}
+ 	let url = socket.request.headers.origin;
+ 	if (conf.developer_mode) {
+diff --git a/realtime/middlewares/authenticate.js b/realtime/middlewares/authenticate.js
+--- a/realtime/middlewares/authenticate.js
++++ b/realtime/middlewares/authenticate.js
+@@ -48,7 +48,7 @@
+ 			path = path + "?" + query_args.toString();
+ 		}
+ 
+-		let headers = {};
++		let headers = { "X-Frappe-Site-Name": get_site_name(socket) };
+ 		if (socket.authorization_header) {
+ 			headers["Authorization"] = socket.authorization_header;
+ 		} else if (socket.sid) {

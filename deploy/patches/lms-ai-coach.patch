@@ -82,3 +82,232 @@
  from frappe.tests.utils import FrappeTestCase
  
  BASELINE = Path(__file__).parent / "docperms.json"
+--- a/lms/lms/utils.py
++++ b/lms/lms/utils.py
+@@ -1000,7 +1000,8 @@
+ 				)
+ 			)
+ 
+-		content = file.get_content()
++		# Frappe v16 otherwise tries legacy text encodings on image bytes.
++		content = file.get_content(encodings=[])
+ 		total_bytes += len(content)
+ 		if total_bytes > MAX_INLINE_IMAGE_BYTES:
+ 			frappe.throw(
+@@ -1071,14 +1072,11 @@
+ 
+ 	# A student cannot create a File row against a Communication they do not own.
+ 	# nosemgrep: lms-unjustified-ignore-permissions - prepare_inline_images already checked has_permission on this file
+-	frappe.get_doc(
+-		{
+-			"doctype": "File",
+-			"file_url": file_url,
+-			"is_private": 1 if file_url.startswith("/private/") else 0,
+-			**filters,
+-		}
+-	).insert(ignore_permissions=True)
++	file = get_readable_files([file_url]).get(file_url)
++	if not file:
++		frappe.throw(_("You cannot read this attachment."), frappe.PermissionError)
++	# Reuse the validated blob; reinserting its URL in v16 decodes and rewrites it.
++	file.create_attachment_copy(doctype, docname, ignore_permissions=True)
+ 
+ 
+ def check_multicurrency(amount: float, currency: str, country: str = None, amount_usd: float = None):
+--- a/lms/lms/course_import_export.py
++++ b/lms/lms/course_import_export.py
+@@ -866,6 +866,23 @@
+ 	# Explicit: File.set_is_private infers only from file_url, which this row has
+ 	# not got yet, so an unset flag silently means public.
+ 	asset_doc.is_private = is_private
++	# Archive citations require this exact URL. v16's content deduplication
++	# otherwise substitutes another File's name, leaving the lesson URL broken.
++	asset_doc.file_url = file_url
++	if asset_doc.exists_on_disk():
++		# A retry may find a blob whose metadata transaction rolled back. Reuse
++		# identical bytes only; never overwrite an unregistered different file.
++		with open(asset_doc.get_full_path(), "rb") as existing_file:
++			if existing_file.read() != content:
++				frappe.throw(_("An unregistered file already occupies this asset URL."))
++		asset_doc.file_size = len(content)
++		asset_doc.generate_content_hash()
++	else:
++		asset_doc.flags.new_file = True
++		asset_doc.save_file(content=content, ignore_existing_file_check=True, overwrite=True)
++	# The blob has been written and checked; preserve it through normal insert
++	# permissions and validation without decoding or deduplicating it again.
++	asset_doc.flags.copy_from_existing_file = True
+ 	asset_doc.insert()
+ 
+ 
+--- a/lms/lms/doctype/lms_certificate_evaluation/lms_certificate_evaluation.py
++++ b/lms/lms/doctype/lms_certificate_evaluation/lms_certificate_evaluation.py
+@@ -106,6 +106,10 @@
+ 		"batch_name": evaluation.batch_name,
+ 	}
+ 
++	# Released Frappe expects a Document here, while newer mappers also accept a dict.
++	if isinstance(target_doc, dict):
++		target_doc = frappe.get_doc(target_doc)
++
+ 	doc = get_mapped_doc(
+ 		"LMS Certificate Evaluation",
+ 		source_name,
+--- a/lms/tests/test_signup_form.py
++++ b/lms/tests/test_signup_form.py
+@@ -31,11 +31,17 @@
+ 				return lms_settings.get(fieldname)
+ 			return original(doctype, fieldname, *args, **kwargs)
+ 
+-		return patch.object(frappe.db, "get_single_value", side_effect=get_single_value)
++		# A real function retains Jinja callable safety attributes on released Frappe.
++		return patch.object(frappe.db, "get_single_value", new=get_single_value)
+ 
+ 	def render(self, **lms_settings):
++		# Released Frappe caches a separate safe-globals dictionary. Patch the
++		# callable the template actually uses, restoring it after each render.
++		template = frappe.get_template(SIGNUP_FORM)
+ 		with self.patched_settings(lms_settings):
+-			return frappe.get_template(SIGNUP_FORM).render({})
++			with patch.dict(template.environment.globals["frappe"]["db"],
++			                {"get_single_value": frappe.db.get_single_value}):
++				return template.render({})
+ 
+ 	def render_without_framework_templates(self, **lms_settings):
+ 		"""Render with only LMS's own templates on the loader path, the way a site
+--- a/lms/tests/security/test_course_import_scope.py
++++ b/lms/tests/security/test_course_import_scope.py
+@@ -7,6 +7,7 @@
+ import json
+ import os
+ import zipfile
++from pathlib import Path
+ 
+ import frappe
+ 
+@@ -106,7 +107,8 @@
+ 			upload = frappe.get_doc(
+ 				{
+ 					"doctype": "File",
+-					"file_url": zip_path,
++					# Model a binary upload; v16 reprocesses a bare existing file URL as text.
++					"content": Path(frappe.get_site_path(zip_path.lstrip("/"))).read_bytes(),
+ 					"file_name": os.path.basename(zip_path),
+ 					"is_private": 1,
+ 				}
+--- a/lms/tests/security/test_assignment_answer_scope.py
++++ b/lms/tests/security/test_assignment_answer_scope.py
+@@ -140,7 +140,12 @@
+ 		so the read has to go through the endpoint that applies field-level ones."""
+ 		frappe.set_user(getattr(self, label).name)
+ 		try:
+-			return client_get("LMS Assignment", self.assignment.name)
++			doc = client_get("LMS Assignment", self.assignment.name)
++			# v16 serializes a redacted field as null; newer Frappe omits its key.
++			# Normalize only that empty value, retaining every canary and grader control.
++			if doc.get("answer") is None:
++				doc.pop("answer", None)
++			return doc
+ 		finally:
+ 			frappe.set_user("Administrator")
+ 
+--- a/lms/tests/security/test_chapter_scorm_field_scope.py
++++ b/lms/tests/security/test_chapter_scorm_field_scope.py
+@@ -124,7 +124,13 @@
+ 		so the read has to go through the endpoint that applies field-level ones."""
+ 		frappe.set_user(getattr(self, label).name)
+ 		try:
+-			return client_get("Course Chapter", self.chapter.name)
++			doc = client_get("Course Chapter", self.chapter.name)
++			# v16 retains null keys after field redaction. Real SCORM values must
++			# still survive for every authoring control and never for a learner.
++			for field in SCORM_FIELDS:
++				if doc.get(field) is None:
++					doc.pop(field, None)
++			return doc
+ 		finally:
+ 			frappe.set_user("Administrator")
+ 
+--- a/lms/tests/test_reconcile_custom_docperm_permlevels.py
++++ b/lms/tests/test_reconcile_custom_docperm_permlevels.py
+@@ -221,9 +221,9 @@
+ 			# Red-phase control: before the patch runs, the pre-upgrade shadow leaves
+ 			# the Moderator without the answer key at all.
+ 			before = client_get(ASSIGNMENT_DOCTYPE, assignment.name)
+-			self.assertNotIn(
+-				"answer",
+-				before,
++			# Released Frappe retains a null key for a field it has redacted.
++			self.assertIsNone(
++				before.get("answer"),
+ 				"control failed: Moderator already reads the answer before the patch runs",
+ 			)
+ 		finally:
+--- a/frontend/src/socket.js
++++ b/frontend/src/socket.js
+@@ -4,9 +4,11 @@
+ export function initSocket() {
+ 	let host = window.location.hostname
+ 	let siteName = window.site_name || host
+-	let port = window.location.port ? `:${socketio_port}` : ''
+-	let protocol = port ? 'http' : 'https'
+-	let url = `${protocol}://${host}${port}/${siteName}`
++	// Production traffic shares the Nginx origin, including a nonstandard HTTP
++	// port. The internal socket server port is used only by the Vite dev server.
++	let url = import.meta.env.DEV
++		? `${window.location.protocol}//${host}:${socketio_port}/${siteName}`
++		: `${window.location.origin}/${siteName}`
+ 
+ 	let socket = io(url, {
+ 		withCredentials: true,
+--- a/lms/tests/security/test_imported_course_media_privacy.py
++++ b/lms/tests/security/test_imported_course_media_privacy.py
+@@ -26,6 +26,7 @@
+ from lms.lms.course_import_export import (
+ 	MAX_IMPORTED_ASSET_BYTES,
+ 	asset_file_url,
++	create_asset_doc,
+ 	asset_is_private,
+ 	asset_member_path,
+ 	asset_members,
+@@ -115,6 +116,29 @@
+ 		finally:
+ 			frappe.set_user(original)
+ 		return course, private_asset, public_asset
++
++	def test_an_identical_orphan_blob_is_reused_without_changing_its_url(self):
++		name = f"orphan-same-{frappe.generate_hash(length=10)}.png"
++		path = frappe.get_site_path("private", "files", name)
++		with open(path, "wb") as existing:
++			existing.write(ONE_PIXEL_PNG)
++		self.addCleanup(lambda: os.path.exists(path) and os.remove(path))
++		create_asset_doc(name, ONE_PIXEL_PNG, 1, set())
++		self.assertTrue(frappe.db.exists("File", {"file_url": f"/private/files/{name}", "is_private": 1}))
++		with open(path, "rb") as existing:
++			self.assertEqual(existing.read(), ONE_PIXEL_PNG)
++
++	def test_an_unregistered_different_blob_is_never_overwritten(self):
++		name = f"orphan-other-{frappe.generate_hash(length=10)}.png"
++		path = frappe.get_site_path("private", "files", name)
++		with open(path, "wb") as existing:
++			existing.write(b"existing different bytes")
++		self.addCleanup(lambda: os.path.exists(path) and os.remove(path))
++		with self.assertRaises(frappe.ValidationError):
++			create_asset_doc(name, ONE_PIXEL_PNG, 1, set())
++		with open(path, "rb") as existing:
++			self.assertEqual(existing.read(), b"existing different bytes")
++		self.assertFalse(frappe.db.exists("File", {"file_url": f"/private/files/{name}"}))
+ 
+ 	def test_an_asset_referenced_by_a_private_url_is_recreated_private(self):
+ 		_, private_asset, _ = self._import()
+--- a/lms/tests/security/test_badge_award_permission.py
++++ b/lms/tests/security/test_badge_award_permission.py
+@@ -7,6 +7,8 @@
+ 	@classmethod
+ 	def setUpClass(cls):
+ 		super().setUpClass()
++		# Rolled-back fixtures must not leave released Frappe client-cache maps.
++		cls.addClassCleanup(frappe.cache_manager.clear_doctype_map, "LMS Badge")
+ 		hash = frappe.generate_hash(length=6)
+ 		cls.student = cls._create_user(f"bawd-{hash}@example.com", "Bea", "Student", ["LMS Student"])
+ 		cls.badge = cls._create_badge(f"Award Badge {hash}", "User", "email", "doc.enabled")

@@ -2,7 +2,7 @@
 
 This branch adds a BPO training and AI Coach application to **stable Frappe Learning v2.66.0**, targeting Frappe **v16.52.0** and **training.everydayai.work**.
 
-**Implementation is unfinished and has not been deployed.** The Python rules tests and custom Vue frontend build pass; a complete Docker/Frappe installation and the security/browser acceptance checks remain outstanding. No release image or verified release tag has been published.
+**Implementation remains unfinished.** A local Docker/Frappe site is running, with verified initialization, HTTP login/file controls, restart recovery and representative native course access checks. Public exposure still requires the remaining permission, feature, backup/restore, browser/provider and load gates in the handoff. No public tunnel, release image or verified release tag has been published.
 
 **Continue on another machine:** read [HANDOFF.md](HANDOFF.md) for clone/setup commands, validation results, known build blockers and the remaining implementation sequence. Application pins are in [deploy/versions.json](deploy/versions.json).
 

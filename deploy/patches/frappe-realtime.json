@@ -1,0 +1,10 @@
+{
+  "realtime/utils.js": {
+    "before": "98a3292c30e2f5803ecd1c06e8756ce9860f5929fe94b96572726deeaa8f81be",
+    "after": "3fa2544e64431505b6721f3a9ea25e002ace02174c633f521743dd0de408e504"
+  },
+  "realtime/middlewares/authenticate.js": {
+    "before": "a150cbedb44008a24ae697a6173d33493eb8e1bac71887579801a3b522e2c220",
+    "after": "8d65e0be0aed4f8a10adf160063fa6864ac8a7ff7751ffe9008323c994d5b928"
+  }
+}

@@ -18,5 +18,49 @@
   "lms/tests/test_docperm_snapshot.py": {
     "before": "38dc08878925f97d4aaa9614c2fe9073403318d292512e674f400181a1d58f3f",
     "after": "a4c13dfd4641b32430bc69c7b58a02753399664d99a02d7a7eb9afd265892344"
+  },
+  "lms/lms/utils.py": {
+    "before": "b8f23c0d1df050edf777669fbccdaf1f2e0d1ded691e6cd7d69de780d9bea4f9",
+    "after": "748d41c4a7d9e16ed05a39c10f6cd4765dd8252fbac04f9be7f42ccb4da91cae"
+  },
+  "lms/lms/course_import_export.py": {
+    "before": "3984288c5d13c4d5e3f0785d26aa078cfa6df08434c687f6b65ccb90ffaeafe9",
+    "after": "c98d62953e177fc6e765117d730fa14e0e28e2984c47c589b3242adee1b0bdac"
+  },
+  "lms/lms/doctype/lms_certificate_evaluation/lms_certificate_evaluation.py": {
+    "before": "7fe99511da83d4faf5547512679cce3cd64e0c5154935ef1ffc67a3a24f0281b",
+    "after": "5995f1f6ef4251de82f71acac89a44508be7b5e68527797715fec063586e49c4"
+  },
+  "lms/tests/test_signup_form.py": {
+    "before": "ac818899cd7ee2d9948e8c9c8688c1738265bd112de0df34f4010ba41b4772d5",
+    "after": "2f35007013969df9caa090a1ac697c02740b7dbcb1f857c5afc74dc098a3bffb"
+  },
+  "lms/tests/security/test_course_import_scope.py": {
+    "before": "7db803935ca37af96349276a96642672b37b2838b2c9eaed02ff67a7b7d9f1d3",
+    "after": "488e9ece208c3ceb677f4f22d025088db92e5c22ca9be1e73da84b7e39f82432"
+  },
+  "lms/tests/security/test_assignment_answer_scope.py": {
+    "before": "056537adc9fa3f8a7a36e29b381bddf20106d24843b8a7528a6166226bafc269",
+    "after": "1960c67349c72a94d257fa8cf188eb08aa9279486f82232680ee495a71eec5d8"
+  },
+  "lms/tests/security/test_chapter_scorm_field_scope.py": {
+    "before": "2282059944f4cd4f12f07f92d67f0ce02f1452390c5e396247252c55801e5bbd",
+    "after": "4bb0792d0c79f9474b52f2b198ba6b342a3d9cff2a16a455fbc8fe3c10848d52"
+  },
+  "lms/tests/test_reconcile_custom_docperm_permlevels.py": {
+    "before": "ea582e0ce72f33c924caac8cf99cf70057f041a1808af2d0418542046f265613",
+    "after": "07b3de2496b90ee1ca53dcae6d569b6cd36ca7eb336a263540587d7bbcd78edf"
+  },
+  "frontend/src/socket.js": {
+    "before": "5a1012934dedd9eb74847c3f1631a8fc8b254e8b694dc2a02b35402789b1bf89",
+    "after": "e8b0bf1803f4a501650c310f01ae7fe0a8defbe8b1e559bfd4fc056903cf099e"
+  },
+  "lms/tests/security/test_imported_course_media_privacy.py": {
+    "before": "bc532233c79a4b95da1d169a5a00670f60549c7ae7715de67d14908d13e1580a",
+    "after": "184ebd68040c700e5d67e0e145d130f4cb069f1a4c3bbae690c8bfd70853d6b5"
+  },
+  "lms/tests/security/test_badge_award_permission.py": {
+    "before": "5f3b88aae1ce82b3dc84b844d4c4b3ddfd6e19b23150d7697399c8109ef1b71a",
+    "after": "b9c3e51e8e60dad1c2b9c152e24d513b64cfb68a0832466663c93d15f89d37ea"
   }
 }

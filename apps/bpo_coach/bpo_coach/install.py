@@ -20,6 +20,9 @@ def setup_defaults():
     for dt, values in {
         'System Settings': {'language': 'en', 'time_zone': 'Asia/Kolkata'},
         'Website Settings': {'home_page': 'coach', 'app_name': 'AI Coach', 'disable_signup': 1},
+        # Internal accounts are provisioned by administrators. Bypass the
+        # upstream onboarding form, which posts answers to an external service.
+        'LMS Settings': {'disable_signup': 1, 'allow_guest_access': 0, 'persona_captured': 1},
     }.items():
         doc = frappe.get_single(dt)
         for key, value in values.items():

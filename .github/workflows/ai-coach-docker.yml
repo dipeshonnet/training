@@ -80,6 +80,8 @@ jobs:
           python deploy/smoke_http.py
       - name: Verify Nginx recovery after a backend address change
         run: python deploy/smoke_dns.py
+      - name: Verify realtime sessions and origin checks through Nginx
+        run: python deploy/smoke_socketio.py
       - name: Run custom app integration tests on the pinned stack
         run: |
           docker compose -f deploy/compose.yaml exec -T backend bench --site "$SITE_HOSTNAME" set-config allow_tests true

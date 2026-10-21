@@ -1,28 +1,31 @@
-# Continue AI Coach v2 on another machine
+# Continue AI Coach v2 deployment
 
 Updated: 21 October 2026 (Asia/Kolkata).
 
-## Status: unfinished development checkpoint
+## Status: local Docker verification; public deployment gates remain open
 
-### Continuation milestone (21 October 2026)
+The site has been initialized locally at `127.0.0.1:8080` with canonical Host `training.everydayai.work`. MariaDB, Redis, backend, workers, scheduler, websocket and Nginx run under Compose project `ai-coach-v2`. Docker Desktop is working on this Windows host. Local credentials are private in ignored `deploy/.env`; database/site volumes contain disposable verification data only. No real training data has been migrated, public tunnel configured, release image published or verified release tag created.
 
-- Added the missing version-specific LMS bridge patch and source hashes. The image build registers `ai_coach` in shared EditorJS tools and adds authenticated desktop/mobile navigation. Tests cover the pinned sources, repeat application, drift and partial application. Native frontend CI passed 1,571 tests across 153 files and its production build.
-- Asset export follows Bench symlinks into real files before the Nginx image copy. Private-file routing now includes the site directory and requests Frappe's authenticated `X-Accel-Redirect` response. Added public-file routing with a restrictive content policy. Actual Nginx/file checks remain pending installation.
-- Initialization resumes app installs, migrates explicitly and preserves extra common configuration. Required roles are created before custom DocType sync. Migration finishes interrupted initial defaults without resetting later administrator changes.
-- Linux Python 3.14/custom frontend CI passed all 25 original milestone checks, including real symlink materialization. Local Python is bundled 3.12.14. After the schema regression test was added, 14 standalone Python tests pass locally; rerun CI for the current commit. Custom production build, four bridge tests and source compilation pass.
-- Docker CI successfully built both image targets at `6f671513b1138a8a58547b6c4463069a84bc2395`. Build corrections include Bench's supported `--no-backups` option (host cron is absent) and fetching Payments from Bench's `upstream` remote with an exact SHA check. Encrypted backup tooling remains outstanding.
-- The custom field `process` shadowed Frappe Meta's `process()` method. Renamed custom stored scope fields to `bpo_process`, updated storage/access paths and retained public API `process` keys through aliases. Added schema regression and real Bench integration tests. Docker CI for `f734adf1a` then successfully installed all apps and completed migration. No initialized real site/data exists here; any future legacy-site import needs an explicit field migration.
-- That run failed at web health: Gunicorn started from the bench root rather than `sites`, making Frappe resolve its paths incorrectly (`/home/frappe/logs/cssutils.log` missing). Added `--chdir sites`. Also added a pinned LMS compatibility patch forwarding search-index `is_continuation` to Frappe; its worker previously raised a signature error. Nine deployment tests now run (eight pass locally, symlink test skips on Windows); the next Docker run must verify HTTP/restart/native gates.
-- Added pinned native frontend CI and Docker foundation CI covering initialization, file/login probes, restart recovery, custom integration and native LMS tests. Inherited release/image publication jobs only run in `frappe/lms`; this fork needs its own verified publication workflow.
-- Docker Desktop 29.9.1 is now installed locally, but its Linux engine cannot start. Backend diagnostics report `WSL update required`; `wsl --update --web-download` failed with `Wsl/CallMsi/Install/REGDB_E_CLASSNOTREG` (Class not registered). No Docker data was reset. Continue Linux CI while the Windows WSL installation is repaired.
+Work remains on `ai-coach-v2` in `https://github.com/dipeshonnet/training`. Keep the stable application pins below. `deploy/versions.json` intentionally remains `development-unverified`; base and service images now have exact digest locks.
 
-Next: inspect Docker CI for the schema fix, finish installation/HTTP/restart/native test gates, then continue the native access-control and feature gates below. A passing image build or unit suite is not a verified release.
+### Completed foundation milestones
 
-Docker CI at `8e4896a8c` passed image builds, full initialization/migration, backend health and native/custom assets served through Nginx. Its file probe stopped during fixture setup because Frappe's `save_file` requires explicit `dt` and `dn`; corrected both to `null`. HTTP login/private-file probes, restart and native tests remain unverified. Added BuildKit layer caching for subsequent CI runs. Custom integration tests run on the restricted training site; upstream native LMS tests run on an isolated baseline site without BPO hooks, whose guest-access policy intentionally differs from upstream.
+- Built both Docker image targets, installed Payments/LMS/BPO Coach, migrated the site and verified native/custom assets through Nginx. Initialization resumes interrupted installs, preserves administrator configuration and can be repeated. Windows CRLF source normalization is performed only after all pinned-source hashes and patch states pass.
+- Verified real Administrator login, guest private-file denial, authenticated private-file retrieval, public-file bytes, internal-route denial and `/coach`. CI uses the actual hashed File URLs returned by Frappe. These probes also pass after restart.
+- Added Nginx dynamic upstream resolution and a frontend health check that reaches Frappe. A disposable DNS probe replaces the backend at a different address while preserving volumes. The probe uses two temporary backend replicas so it works on Docker engines that disallow explicit IPs on automatically allocated subnets.
+- Added scoped native course catalog/count/details/outline/lesson adapters. Filters apply before upstream pagination. Nine custom Frappe integration tests cover installation/schema/roles, storage and representative learner/native visibility paths, including draft company-wide content and enrollment filters. This is partial permission coverage; the broader native paths below remain open.
+- Version-specific LMS compatibility patches address search-index continuation, DocPerm helper imports, certificate mapper documents, binary image attachments, ZIP upload fixtures and imported asset URL preservation. Media tests cover reuse of identical orphan files and rejection of different existing bytes. Redaction tests still assert that real secret canaries are hidden and authorized authors/graders retain access; null redacted keys are normalized for released Frappe.
+- Native frontend uses the browser origin for production realtime traffic. A hash-checked Frappe Node patch forwards the validated site header to the configured internal backend. Nginx preserves supplied browser origins. `deploy/smoke_socketio.py` exercises authenticated namespace connections and denial of invalid origins and guests.
+- New internal sites disable signup/guest catalog access and skip native persona collection, which otherwise submits to an external service. Completed setups retain administrator choices. The disposable existing local training site was explicitly brought to these defaults.
+- Standalone rules: 14 pass. Deployment contracts: 10 checks (Windows symlink check skips; actual Linux asset materialization passed). Custom frontend: four bridge tests and production build pass. Native frontend checkpoint CI passed 1,571 tests across 153 files and a production build at `3106b9e`; rebuilt locally with a 4 GB Node heap after the default heap exhausted memory.
 
-This commit preserves implementation work so development can continue on a working Docker host. **Do not treat it as a completed, secure or deployable release.** No site has been initialized, no training data migrated, no Cloudflare Tunnel configured, no GHCR image published, and no verified release tag created.
+### Verification still being finalized
 
-The upstream LMS code is based on the released `v2.66.0` tag, not the previous development fork. Existing `develop` history remains separate. Work is on `ai-coach-v2` in `https://github.com/dipeshonnet/training`.
+The latest native full-suite run passed 75 unit tests, 167 additional unit tests and the ordinary test group, but one integration setup hit a stale rolled-back badge cache. The pinned test cleanup now clears that map; rerun the full suite and record the final results here. The latest Docker CI at `3106b9e` stopped on its old fixed-IP DNS probe; that portability fix and realtime gate need a new CI run.
+
+The local app/frontend images include small development verification overlays. A fresh Docker/CI build from the final committed sources remains the reproducibility gate; never publish the local overlay tags as release images. Test execution is enabled only on disposable sites. Remove the `lms-baseline.local` test site and disable `allow_tests` before any public exposure.
+
+Next: finish the foundation regression/CI checks, then continue the access-control, feature, backup/restore and browser/provider gates below. Keep the tunnel profile off until those gates pass.
 
 ## 1. Clone the correct branch
 
@@ -51,7 +54,7 @@ Target application revisions:
 - Payments `version-16`: `cca07d9f9392e2ea0e521c5975151db9e4b6c321`.
 - Python 3.14, Node 24, MariaDB 11.8, Redis 7, Bench 5.29.1.
 
-`deploy/versions.json` records the pins and intentionally says `development-unverified`. Container digests have not yet been resolved. Keep secrets and real site data out of this public repository.
+`deploy/versions.json` records the pins and intentionally says `development-unverified`. Container base and service digests are recorded in the Dockerfile, Compose file and version manifest. Keep secrets and real site data out of this public repository.
 
 ## 3. Run the checks that currently work
 
@@ -86,11 +89,11 @@ Set-Location ../../..
 
 Observed before handoff:
 
-- Nine pure Python tests pass. The scoring parity test covers 160 generated cases from the existing pilot engine, including action scoring, completion, weighted grading and evidence validation.
+- Fourteen pure Python tests pass. The scoring parity test covers 160 generated cases from the existing pilot engine, including action scoring, completion, weighted grading and evidence validation.
 - Unicode answer normalization and assessment redaction fixtures pass.
 - Custom Vue production build succeeds. It emits `main.js` and `main.css`; the main JavaScript bundle currently exceeds Vite's advisory 500 kB threshold.
 - Python source compilation passes.
-- Native LMS/Frappe tests, frontend interaction tests, browser/microphone tests, live Groq checks and load tests have **not** run against this implementation.
+- Native frontend tests/build, custom Frappe integration, HTTP controls and basic desktop portal navigation have run. Full native server verification is being finalized. Microphone, live Groq, load and the remaining feature interactions are outstanding.
 
 The custom frontend now has four EditorJS bridge tests. Run `npm test` as well as `npm run build`. The microphone, builder, simulation and SOP interaction tests remain outstanding. Run deployment contract checks with `python -m unittest discover -s deploy -p 'test_*.py' -v`; the patch tests need the pinned LMS commit available in Git history.
 
@@ -98,12 +101,12 @@ The parity fixture is committed and does not require the original pilot checkout
 
 ## 4. Fix these blockers before trying to deploy
 
-1. **LMS integration needs native verification:** the missing `deploy/patches/lms-ai-coach.patch` is implemented and tested against the pinned sources. Verify the patched native frontend CI and actual EditorJS authoring/rendering and navigation in a live site. The tool implementation is `apps/bpo_coach/frontend/src/bridge.js`.
-2. **Native access paths need integration coverage:** custom API scope checks and Frappe hooks are initial code only. Audit and test native LMS whitelisted methods, SQL/search/report paths, direct document writes and file access; do not assume document hooks cover queries that bypass them. Tighten any scope bypasses before public exposure.
-3. **Docker asset handling needs execution:** asset export now materializes symlink targets, and Nginx routes private files through the site directory. Run the Linux symlink test and Docker HTTP probes for native/custom assets, guest denial, authenticated private-file retrieval and internal-route denial.
-4. **Frappe install/bootstrap needs execution:** verify custom DocTypes and roles sync in the correct order, separate app installation, `after_migrate`, native batch/course required fields and enrollment behaviour against the pinned versions. Confirm the Bench command options and dependencies during an actual build.
+1. **LMS integration needs feature verification:** the pinned bridge patch and native frontend CI pass. Verify actual EditorJS authoring/rendering in a live site and the full desktop/mobile navigation flows. The tool implementation is `apps/bpo_coach/frontend/src/bridge.js`.
+2. **Native access paths need integration coverage:** custom API scope checks, hooks and six native read adapters have representative integration coverage. Audit and test native LMS whitelisted methods, SQL/search/report paths, direct document writes and file access; do not assume document hooks cover queries that bypass them. Tighten any scope bypasses before public exposure.
+3. **Docker asset/file foundation passes locally:** asset materialization and Nginx public/private/internal routing probes pass. Keep these checks in CI and verify scoped uploaded course media with representative non-administrator users.
+4. **Frappe install/bootstrap passes locally:** custom DocTypes/roles, separate app installation, migration and retry recovery have run. Continue native batch/course/enrollment and interrupted-upgrade coverage against the pinned versions.
 5. **Missing operational features:** encrypted backup/restore and R2 upload tooling, portable setup/upgrade commands, the read-only pilot exporter/importer, verified release-image publication and digest recording are not implemented. Import/reminder record metadata alone is not an importer.
-6. **CI remains partial:** checkpoint CI now includes rules/install/deployment/bridge tests and a patched native frontend test/build. Docker foundation CI was added but has not been verified yet. Browser, full native permission integration and release publication gates remain outstanding. Inherited upstream release/image jobs have fork guards.
+6. **CI remains partial:** checkpoint CI now includes rules/install/deployment/bridge tests and a patched native frontend test/build. Docker foundation CI has verified builds, initialization, HTTP and restart; the updated DNS/realtime/full native gates need a green final run. Browser, full native permission integration and release publication gates remain outstanding. Inherited upstream release/image jobs have fork guards.
 
 Other targeted follow-ups:
 
@@ -132,17 +135,17 @@ docker compose --env-file deploy/.env -f deploy/compose.yaml ps
 docker compose --env-file deploy/.env -f deploy/compose.yaml logs --tail 100 initialize backend
 ```
 
-These are the intended commands for the current scaffold, **not previously verified installation instructions**. The default local frontend binds to `127.0.0.1:8080`; configure local DNS/hosts for `training.everydayai.work` while testing, or send its Host header when checking the origin. Do not change public DNS to an unverified site.
+These commands have initialized and started the local verification site. A clean build from the latest committed sources is still required before release. The default local frontend binds to `127.0.0.1:8080`; configure local DNS/hosts for `training.everydayai.work` while testing, or send its Host header when checking the origin. Do not change public DNS to an unverified site.
 
 The initializer installs Payments, LMS and `bpo_coach` on a new site. The backend entry point passes through explicit Bench commands, for example:
 
 ```bash
 docker compose --env-file deploy/.env -f deploy/compose.yaml exec backend bench --site training.everydayai.work list-apps
 docker compose --env-file deploy/.env -f deploy/compose.yaml exec backend bench --site training.everydayai.work set-config allow_tests true
-docker compose --env-file deploy/.env -f deploy/compose.yaml exec backend bench --site training.everydayai.work run-tests --app lms
+docker compose --env-file deploy/.env -f deploy/compose.yaml exec backend bench --site training.everydayai.work run-tests --app bpo_coach
 ```
 
-Add native Frappe integration tests for the custom app and run them through Bench. The existing `apps/bpo_coach/tests` directory currently contains standalone rules tests only.
+Run native LMS tests on a separate disposable baseline site with Payments and LMS only, matching Docker CI. The restricted training site intentionally changes upstream guest-access assumptions. The custom Bench tests live in `apps/bpo_coach/bpo_coach/tests`; standalone rules remain in `apps/bpo_coach/tests`.
 
 ## 6. Complete the original feature and deployment gates
 

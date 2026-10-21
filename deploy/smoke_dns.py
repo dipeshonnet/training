@@ -9,7 +9,6 @@ from pathlib import Path
 import subprocess
 import sys
 from urllib.request import Request, urlopen
-import uuid
 
 COMPOSE = ['docker', 'compose', '-f', 'deploy/compose.yaml']
 
@@ -30,14 +29,13 @@ def backend_address():
 
 def check():
     network, old_address = backend_address()
-    config = json.loads(capture(*COMPOSE, 'config', '--format', 'json'))
-    holder = 'ai-coach-dns-probe-' + uuid.uuid4().hex[:10]
-    # Hold the old address so the new backend must receive a different one.
-    # Without this, Docker can reuse it and a stale Nginx resolver appears valid.
-    subprocess.run(COMPOSE + ['rm', '--stop', '--force', 'backend'], check=True)
+    old_container = capture(*COMPOSE, 'ps', '-q', 'backend')
+    # Start the replacement while the original still owns its address. This
+    # forces a different dynamic IP without requiring a fixed IPAM subnet.
     try:
-        capture('docker', 'run', '--detach', '--rm', '--name', holder, '--network', network,
-                '--ip', old_address, config['services']['redis-cache']['image'], 'sleep', '300')
+        subprocess.run(COMPOSE + ['up', '--no-build', '--no-deps', '-d', '--wait',
+                                   '--wait-timeout', '180', '--scale', 'backend=2', 'backend'], check=True)
+        subprocess.run(['docker', 'rm', '--force', old_container], check=True)
         subprocess.run(COMPOSE + ['up', '--no-build', '--no-deps', '-d', '--wait',
                                    '--wait-timeout', '180', 'backend', 'frontend'], check=True)
         _, new_address = backend_address()
@@ -49,10 +47,9 @@ def check():
         subprocess.run([sys.executable, str(Path(__file__).with_name('smoke_http.py'))], check=True)
         print(f'Nginx recovered after backend address changed from {old_address} to {new_address}.')
     finally:
-        subprocess.run(['docker', 'rm', '--force', holder], stdout=subprocess.DEVNULL,
-                        stderr=subprocess.DEVNULL, check=False)
         # Also restore service availability when an assertion or setup fails.
-        subprocess.run(COMPOSE + ['up', '--no-build', '--no-deps', '-d', 'backend', 'frontend'],
+        subprocess.run(COMPOSE + ['up', '--no-build', '--no-deps', '-d', '--scale', 'backend=1',
+                                  'backend', 'frontend'],
                         check=False)
 
 

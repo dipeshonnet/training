@@ -22,6 +22,10 @@ class TestInstallation(IntegrationTestCase):
         self.assertTrue(frappe.get_meta('LMS Course').has_field('bpo_process'))
         self.assertTrue(frappe.get_meta('LMS Batch').has_field('bpo_process'))
         self.assertTrue(frappe.db.get_global('bpo_coach_setup_complete'))
+        settings = frappe.get_single('LMS Settings')
+        self.assertTrue(settings.disable_signup)
+        self.assertFalse(settings.allow_guest_access)
+        self.assertTrue(settings.persona_captured)
 
     def test_process_storage_preserves_workspace_response_contract(self):
         previous_user = frappe.session.user

@@ -1,3 +1,15 @@
+# AI Coach v2 — development checkpoint
+
+This branch adds a BPO training and AI Coach application to **stable Frappe Learning v2.66.0**, targeting Frappe **v16.52.0** and **training.everydayai.work**.
+
+**Implementation is unfinished and has not been deployed.** The Python rules tests and custom Vue frontend build pass; a complete Docker/Frappe installation and the security/browser acceptance checks remain outstanding. No release image or verified release tag has been published.
+
+**Continue on another machine:** read [HANDOFF.md](HANDOFF.md) for clone/setup commands, validation results, known build blockers and the remaining implementation sequence. Application pins are in [deploy/versions.json](deploy/versions.json).
+
+The original upstream README follows. Its generic upstream installation instructions do not install the unfinished custom app in this checkpoint; use the handoff instructions for this branch.
+
+---
+
 <div align="center" markdown="1">
 
 <img src=".github/lms-logo.png" alt="Frappe Learning logo" width="80" height="80"/>

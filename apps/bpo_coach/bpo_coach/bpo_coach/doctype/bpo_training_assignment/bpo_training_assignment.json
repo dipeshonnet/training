@@ -1,0 +1,97 @@
+{
+  "doctype": "DocType",
+  "name": "BPO Training Assignment",
+  "module": "BPO Coach",
+  "autoname": "hash",
+  "engine": "InnoDB",
+  "field_order": [
+    "member",
+    "batch",
+    "process",
+    "course",
+    "scenario_version",
+    "channels_json",
+    "bindings_json",
+    "mandatory",
+    "due_date",
+    "assignment_key",
+    "assigned_by"
+  ],
+  "fields": [
+    {
+      "fieldname": "member",
+      "label": "Member",
+      "fieldtype": "Link",
+      "options": "User",
+      "reqd": 1
+    },
+    {
+      "fieldname": "batch",
+      "label": "Batch",
+      "fieldtype": "Link",
+      "options": "LMS Batch"
+    },
+    {
+      "fieldname": "process",
+      "label": "Process",
+      "fieldtype": "Link",
+      "options": "BPO Process"
+    },
+    {
+      "fieldname": "course",
+      "label": "Course",
+      "fieldtype": "Link",
+      "options": "LMS Course"
+    },
+    {
+      "fieldname": "scenario_version",
+      "label": "Scenario Version",
+      "fieldtype": "Link",
+      "options": "AI Scenario Version"
+    },
+    {
+      "fieldname": "channels_json",
+      "label": "Channels Json",
+      "fieldtype": "Long Text"
+    },
+    {
+      "fieldname": "bindings_json",
+      "label": "Bindings Json",
+      "fieldtype": "Long Text"
+    },
+    {
+      "fieldname": "mandatory",
+      "label": "Mandatory",
+      "fieldtype": "Check",
+      "default": "1"
+    },
+    {
+      "fieldname": "due_date",
+      "label": "Due Date",
+      "fieldtype": "Datetime"
+    },
+    {
+      "fieldname": "assignment_key",
+      "label": "Assignment Key",
+      "fieldtype": "Data",
+      "unique": 1
+    },
+    {
+      "fieldname": "assigned_by",
+      "label": "Assigned By",
+      "fieldtype": "Link",
+      "options": "User"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "BPO Administrator",
+      "read": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    }
+  ],
+  "track_changes": 1,
+  "allow_rename": 0
+}

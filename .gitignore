@@ -19,3 +19,18 @@ test-results
 playwright-report
 blob-report
 playwright/.auth
+# AI Coach runtime state
+.env
+.env.*
+!deploy/.env.example
+deploy/backups/
+deploy/secrets/
+*.sql.gz
+*.enc
+.pilot-*.json
+.local-*.json
+apps/bpo_coach/bpo_coach/public/coach/
+apps/bpo_coach/frontend/dist/
+!apps/bpo_coach/frontend/package-lock.json
+.venv/
+.pytest_cache/

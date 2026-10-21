@@ -1,0 +1,14 @@
+[project]
+name = "bpo_coach"
+version = "2.0.0.dev0"
+description = "BPO learning operations and native AI Coach for stable Frappe Learning"
+requires-python = ">=3.14,<3.15"
+dependencies = ["groq>=0.30,<2", "jsonschema>=4.23,<5", "boto3>=1.35,<2"]
+
+[build-system]
+requires = ["flit_core>=3.9,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.bench.frappe-dependencies]
+frappe = ">=16.52.0,<17.0.0"
+lms = ">=2.66.0,<2.67.0"

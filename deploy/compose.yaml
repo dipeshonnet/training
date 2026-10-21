@@ -1,0 +1,93 @@
+name: ai-coach-v2
+x-app: &app
+  image: ${AI_COACH_IMAGE:-ai-coach-training:local}
+  build:
+    context: ..
+    dockerfile: deploy/Dockerfile
+    target: app
+  restart: unless-stopped
+  environment: &environment
+    SITE_HOSTNAME: ${SITE_HOSTNAME:-training.everydayai.work}
+    DB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Configure deploy/.env}
+    ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Configure deploy/.env}
+    GROQ_API_KEY: ${GROQ_API_KEY:-}
+  volumes:
+    - sites:/home/frappe/frappe-bench/sites
+    - logs:/home/frappe/frappe-bench/logs
+  depends_on:
+    db: {condition: service_healthy}
+    redis-cache: {condition: service_healthy}
+    redis-queue: {condition: service_healthy}
+services:
+  db:
+    image: mariadb:11.8
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Configure deploy/.env}
+    command: [--character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci]
+    volumes: [database:/var/lib/mysql]
+    healthcheck:
+      test: [CMD, healthcheck.sh, --connect, --innodb_initialized]
+      interval: 10s
+      retries: 30
+  redis-cache:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck: {test: [CMD, redis-cli, ping], interval: 10s, retries: 10}
+  redis-queue:
+    image: redis:7-alpine
+    command: [redis-server, --appendonly, 'yes']
+    restart: unless-stopped
+    volumes: [queue:/data]
+    healthcheck: {test: [CMD, redis-cli, ping], interval: 10s, retries: 10}
+  initialize:
+    <<: *app
+    command: [initialize]
+    restart: 'no'
+  backend:
+    <<: *app
+    command: [web]
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request,os; r=urllib.request.Request('http://127.0.0.1:8000/api/method/ping',headers={'Host':os.environ['SITE_HOSTNAME']}); urllib.request.urlopen(r,timeout=5)"]
+      interval: 30s
+      retries: 5
+    depends_on:
+      initialize: {condition: service_completed_successfully}
+  worker:
+    <<: *app
+    command: [worker]
+    depends_on:
+      initialize: {condition: service_completed_successfully}
+  scheduler:
+    <<: *app
+    command: [scheduler]
+    depends_on:
+      initialize: {condition: service_completed_successfully}
+  websocket:
+    <<: *app
+    command: [websocket]
+    depends_on:
+      initialize: {condition: service_completed_successfully}
+  frontend:
+    image: ${FRONTEND_IMAGE:-ai-coach-training-frontend:local}
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+      target: frontend
+    restart: unless-stopped
+    ports: ['${HTTP_BIND:-127.0.0.1}:${HTTP_PORT:-8080}:8080']
+    volumes: [sites:/home/frappe/frappe-bench/sites:ro]
+    depends_on: [backend, websocket]
+  tunnel:
+    image: cloudflare/cloudflared:2026.10.0
+    profiles: [online]
+    restart: unless-stopped
+    command: [tunnel, --no-autoupdate, run]
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on: [frontend]
+volumes:
+  database:
+  sites:
+  logs:
+  queue:

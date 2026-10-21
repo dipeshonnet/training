@@ -1,0 +1,55 @@
+{
+  "doctype": "DocType",
+  "name": "AI Asset",
+  "module": "BPO Coach",
+  "autoname": "hash",
+  "engine": "InnoDB",
+  "field_order": [
+    "process",
+    "company_wide",
+    "file",
+    "filename",
+    "checksum"
+  ],
+  "fields": [
+    {
+      "fieldname": "process",
+      "label": "Process",
+      "fieldtype": "Link",
+      "options": "BPO Process"
+    },
+    {
+      "fieldname": "company_wide",
+      "label": "Company Wide",
+      "fieldtype": "Check",
+      "default": "0"
+    },
+    {
+      "fieldname": "file",
+      "label": "File",
+      "fieldtype": "Link",
+      "options": "File"
+    },
+    {
+      "fieldname": "filename",
+      "label": "Filename",
+      "fieldtype": "Data"
+    },
+    {
+      "fieldname": "checksum",
+      "label": "Checksum",
+      "fieldtype": "Data"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "BPO Administrator",
+      "read": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    }
+  ],
+  "track_changes": 1,
+  "allow_rename": 0
+}

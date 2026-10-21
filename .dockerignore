@@ -1,0 +1,11 @@
+.git
+**/node_modules
+**/__pycache__
+**/.env
+**/.env.*
+!deploy/.env.example
+deploy/backups
+deploy/secrets
+test-results
+playwright-report
+.npm-cache

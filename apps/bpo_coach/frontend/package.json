@@ -1,0 +1,6 @@
+{
+  "name": "bpo-coach-frontend", "version": "2.0.0-dev.0", "private": true, "type": "module",
+  "scripts": {"build": "vite build", "test": "vitest run", "dev": "vite --host 127.0.0.1"},
+  "dependencies": {"vue": "3.5.27", "docx": "9.11.0"},
+  "devDependencies": {"@vitejs/plugin-vue": "6.0.10", "vite": "8.3.4", "vitest": "4.1.7", "@vue/test-utils": "2.4.10", "jsdom": "29.1.1", "typescript": "5.7.2"}
+}

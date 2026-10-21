@@ -1,0 +1,60 @@
+{
+  "doctype": "DocType",
+  "name": "AI Provider Settings",
+  "module": "BPO Coach",
+  "autoname": "hash",
+  "engine": "InnoDB",
+  "field_order": [
+    "api_key",
+    "text_model",
+    "stt_model",
+    "tts_model",
+    "tts_voice"
+  ],
+  "fields": [
+    {
+      "fieldname": "api_key",
+      "label": "Api Key",
+      "fieldtype": "Password"
+    },
+    {
+      "fieldname": "text_model",
+      "label": "Text Model",
+      "fieldtype": "Data",
+      "default": "openai/gpt-oss-120b"
+    },
+    {
+      "fieldname": "stt_model",
+      "label": "Stt Model",
+      "fieldtype": "Data",
+      "default": "whisper-large-v3-turbo"
+    },
+    {
+      "fieldname": "tts_model",
+      "label": "Tts Model",
+      "fieldtype": "Data",
+      "default": "canopylabs/orpheus-v1-english"
+    },
+    {
+      "fieldname": "tts_voice",
+      "label": "Tts Voice",
+      "fieldtype": "Data",
+      "default": "troy"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "BPO Administrator",
+      "read": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1,
+      "create": 1,
+      "write": 1,
+      "delete": 1
+    }
+  ],
+  "track_changes": 1,
+  "allow_rename": 0,
+  "issingle": 1
+}

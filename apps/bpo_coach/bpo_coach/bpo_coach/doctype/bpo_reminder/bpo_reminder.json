@@ -1,0 +1,55 @@
+{
+  "doctype": "DocType",
+  "name": "BPO Reminder",
+  "module": "BPO Coach",
+  "autoname": "hash",
+  "engine": "InnoDB",
+  "field_order": [
+    "reminder_key",
+    "assignment",
+    "member",
+    "category",
+    "local_date"
+  ],
+  "fields": [
+    {
+      "fieldname": "reminder_key",
+      "label": "Reminder Key",
+      "fieldtype": "Data",
+      "unique": 1
+    },
+    {
+      "fieldname": "assignment",
+      "label": "Assignment",
+      "fieldtype": "Link",
+      "options": "BPO Training Assignment"
+    },
+    {
+      "fieldname": "member",
+      "label": "Member",
+      "fieldtype": "Link",
+      "options": "User"
+    },
+    {
+      "fieldname": "category",
+      "label": "Category",
+      "fieldtype": "Data"
+    },
+    {
+      "fieldname": "local_date",
+      "label": "Local Date",
+      "fieldtype": "Date"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "BPO Administrator",
+      "read": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    }
+  ],
+  "track_changes": 1,
+  "allow_rename": 0
+}

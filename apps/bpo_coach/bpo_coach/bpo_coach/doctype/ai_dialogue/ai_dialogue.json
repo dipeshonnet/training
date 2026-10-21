@@ -1,0 +1,75 @@
+{
+  "doctype": "DocType",
+  "name": "AI Dialogue",
+  "module": "BPO Coach",
+  "autoname": "hash",
+  "engine": "InnoDB",
+  "field_order": [
+    "attempt",
+    "request_id",
+    "turn_key",
+    "sequence",
+    "agent_text",
+    "customer_text",
+    "state",
+    "error_message"
+  ],
+  "fields": [
+    {
+      "fieldname": "attempt",
+      "label": "Attempt",
+      "fieldtype": "Link",
+      "options": "AI Attempt",
+      "reqd": 1
+    },
+    {
+      "fieldname": "request_id",
+      "label": "Request Id",
+      "fieldtype": "Data",
+      "reqd": 1
+    },
+    {
+      "fieldname": "turn_key",
+      "label": "Turn Key",
+      "fieldtype": "Data",
+      "unique": 1
+    },
+    {
+      "fieldname": "sequence",
+      "label": "Sequence",
+      "fieldtype": "Int"
+    },
+    {
+      "fieldname": "agent_text",
+      "label": "Agent Text",
+      "fieldtype": "Long Text"
+    },
+    {
+      "fieldname": "customer_text",
+      "label": "Customer Text",
+      "fieldtype": "Long Text"
+    },
+    {
+      "fieldname": "state",
+      "label": "State",
+      "fieldtype": "Select",
+      "options": "pending\ncompleted\nfailed"
+    },
+    {
+      "fieldname": "error_message",
+      "label": "Error Message",
+      "fieldtype": "Small Text"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "BPO Administrator",
+      "read": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    }
+  ],
+  "track_changes": 1,
+  "allow_rename": 0
+}

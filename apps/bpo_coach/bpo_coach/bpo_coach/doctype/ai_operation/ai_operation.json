@@ -1,0 +1,60 @@
+{
+  "doctype": "DocType",
+  "name": "AI Operation",
+  "module": "BPO Coach",
+  "autoname": "hash",
+  "engine": "InnoDB",
+  "field_order": [
+    "attempt",
+    "operation_key",
+    "request_id",
+    "operation",
+    "fingerprint",
+    "response_json"
+  ],
+  "fields": [
+    {
+      "fieldname": "attempt",
+      "label": "Attempt",
+      "fieldtype": "Link",
+      "options": "AI Attempt"
+    },
+    {
+      "fieldname": "operation_key",
+      "label": "Operation Key",
+      "fieldtype": "Data",
+      "unique": 1
+    },
+    {
+      "fieldname": "request_id",
+      "label": "Request Id",
+      "fieldtype": "Data"
+    },
+    {
+      "fieldname": "operation",
+      "label": "Operation",
+      "fieldtype": "Data"
+    },
+    {
+      "fieldname": "fingerprint",
+      "label": "Fingerprint",
+      "fieldtype": "Data"
+    },
+    {
+      "fieldname": "response_json",
+      "label": "Response Json",
+      "fieldtype": "Long Text"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "BPO Administrator",
+      "read": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    }
+  ],
+  "track_changes": 1,
+  "allow_rename": 0
+}

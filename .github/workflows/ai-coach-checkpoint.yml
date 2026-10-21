@@ -1,0 +1,32 @@
+name: AI Coach checkpoint checks
+on:
+  push:
+    branches: [ai-coach-v2]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  rules-and-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: Install standalone rules-test dependency
+        run: python -m pip install jsonschema==4.26.0
+      - name: Compile custom Python sources
+        run: python -m compileall -q apps/bpo_coach/bpo_coach deploy
+      - name: Verify pilot scoring parity and rules
+        env:
+          PYTHONPATH: apps/bpo_coach
+        run: python -m unittest discover -s apps/bpo_coach/tests -v
+      - name: Install custom frontend dependencies
+        working-directory: apps/bpo_coach/frontend
+        run: npm ci
+      - name: Build custom Vue frontend
+        working-directory: apps/bpo_coach/frontend
+        run: npm run build

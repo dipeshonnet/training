@@ -1,0 +1,8 @@
+{% extends "templates/web.html" %}
+{% block title %}AI Coach{% endblock %}
+{% block page_content %}
+<div id="ai-coach"></div>
+<script>window.bpoCoachBoot={{ boot_json | safe }};</script>
+<script type="module" src="/assets/bpo_coach/coach/main.js"></script>
+<link rel="stylesheet" href="/assets/bpo_coach/coach/main.css">
+{% endblock %}

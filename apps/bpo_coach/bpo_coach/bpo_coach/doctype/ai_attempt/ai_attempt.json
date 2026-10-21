@@ -1,0 +1,166 @@
+{
+  "doctype": "DocType",
+  "name": "AI Attempt",
+  "module": "BPO Coach",
+  "autoname": "hash",
+  "engine": "InnoDB",
+  "field_order": [
+    "member",
+    "process",
+    "assignment",
+    "lesson",
+    "scenario_version",
+    "mode",
+    "channel",
+    "status",
+    "grading_status",
+    "current_step",
+    "started_at",
+    "submitted_at",
+    "grading_started_at",
+    "grading_generation",
+    "grading_error",
+    "result_json",
+    "review_note",
+    "reviewed_by",
+    "reviewed_at",
+    "active_key",
+    "activity_id"
+  ],
+  "fields": [
+    {
+      "fieldname": "member",
+      "label": "Member",
+      "fieldtype": "Link",
+      "options": "User",
+      "reqd": 1
+    },
+    {
+      "fieldname": "process",
+      "label": "Process",
+      "fieldtype": "Link",
+      "options": "BPO Process"
+    },
+    {
+      "fieldname": "assignment",
+      "label": "Assignment",
+      "fieldtype": "Link",
+      "options": "BPO Training Assignment",
+      "reqd": 1
+    },
+    {
+      "fieldname": "lesson",
+      "label": "Lesson",
+      "fieldtype": "Link",
+      "options": "Course Lesson"
+    },
+    {
+      "fieldname": "scenario_version",
+      "label": "Scenario Version",
+      "fieldtype": "Link",
+      "options": "AI Scenario Version",
+      "reqd": 1
+    },
+    {
+      "fieldname": "mode",
+      "label": "Mode",
+      "fieldtype": "Select",
+      "options": "walkthrough\npractice\nassessment",
+      "reqd": 1
+    },
+    {
+      "fieldname": "channel",
+      "label": "Channel",
+      "fieldtype": "Select",
+      "options": "workflow\nchat\nvoice",
+      "reqd": 1
+    },
+    {
+      "fieldname": "status",
+      "label": "Status",
+      "fieldtype": "Select",
+      "default": "active",
+      "options": "active\ngrading\nsubmitted\napproved\nretry"
+    },
+    {
+      "fieldname": "grading_status",
+      "label": "Grading Status",
+      "fieldtype": "Select",
+      "default": "not_started",
+      "options": "not_started\nqueued\nrunning\nfailed\ncompleted"
+    },
+    {
+      "fieldname": "current_step",
+      "label": "Current Step",
+      "fieldtype": "Int"
+    },
+    {
+      "fieldname": "started_at",
+      "label": "Started At",
+      "fieldtype": "Datetime"
+    },
+    {
+      "fieldname": "submitted_at",
+      "label": "Submitted At",
+      "fieldtype": "Datetime"
+    },
+    {
+      "fieldname": "grading_started_at",
+      "label": "Grading Started At",
+      "fieldtype": "Datetime"
+    },
+    {
+      "fieldname": "grading_generation",
+      "label": "Grading Generation",
+      "fieldtype": "Int"
+    },
+    {
+      "fieldname": "grading_error",
+      "label": "Grading Error",
+      "fieldtype": "Small Text"
+    },
+    {
+      "fieldname": "result_json",
+      "label": "Result Json",
+      "fieldtype": "Long Text"
+    },
+    {
+      "fieldname": "review_note",
+      "label": "Review Note",
+      "fieldtype": "Small Text"
+    },
+    {
+      "fieldname": "reviewed_by",
+      "label": "Reviewed By",
+      "fieldtype": "Link",
+      "options": "User"
+    },
+    {
+      "fieldname": "reviewed_at",
+      "label": "Reviewed At",
+      "fieldtype": "Datetime"
+    },
+    {
+      "fieldname": "active_key",
+      "label": "Active Key",
+      "fieldtype": "Data",
+      "unique": 1
+    },
+    {
+      "fieldname": "activity_id",
+      "label": "Activity Id",
+      "fieldtype": "Data"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "BPO Administrator",
+      "read": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    }
+  ],
+  "track_changes": 1,
+  "allow_rename": 0
+}

@@ -1,0 +1,217 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "office": {
+      "type": "string",
+      "enum": [
+        "front",
+        "back"
+      ]
+    },
+    "brief": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "reference": {
+      "type": "string",
+      "maxLength": 20000
+    },
+    "outcome": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "customerName": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "persona": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "opening": {
+      "type": "string",
+      "maxLength": 2000
+    },
+    "threshold": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "rubric": {
+      "minItems": 1,
+      "maxItems": 4,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "enum": [
+              "procedure",
+              "resolution",
+              "compliance",
+              "communication"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "weight": {
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 100
+          },
+          "guidance": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "weight",
+          "guidance"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "steps": {
+      "maxItems": 40,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "instructions": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "hint": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "assetId": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "critical": {
+            "type": "boolean"
+          },
+          "hotspots": {
+            "maxItems": 30,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "click",
+                    "input"
+                  ]
+                },
+                "x": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "y": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "w": {
+                  "type": "number",
+                  "minimum": 0.005,
+                  "maximum": 1
+                },
+                "h": {
+                  "type": "number",
+                  "minimum": 0.005,
+                  "maximum": 1
+                },
+                "accepted": {
+                  "maxItems": 30,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "maxLength": 500
+                  }
+                },
+                "correct": {
+                  "type": "boolean"
+                },
+                "critical": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "label",
+                "type",
+                "x",
+                "y",
+                "w",
+                "h",
+                "accepted",
+                "correct",
+                "critical"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "instructions",
+          "hint",
+          "assetId",
+          "critical",
+          "hotspots"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "title",
+    "office",
+    "brief",
+    "reference",
+    "outcome",
+    "customerName",
+    "persona",
+    "opening",
+    "threshold",
+    "rubric",
+    "steps"
+  ],
+  "additionalProperties": false
+}

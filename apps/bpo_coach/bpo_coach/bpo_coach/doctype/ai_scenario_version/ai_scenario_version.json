@@ -1,0 +1,78 @@
+{
+  "doctype": "DocType",
+  "name": "AI Scenario Version",
+  "module": "BPO Coach",
+  "autoname": "hash",
+  "engine": "InnoDB",
+  "field_order": [
+    "scenario",
+    "version",
+    "process",
+    "company_wide",
+    "version_key",
+    "content_json",
+    "content_hash",
+    "published_by"
+  ],
+  "fields": [
+    {
+      "fieldname": "scenario",
+      "label": "Scenario",
+      "fieldtype": "Link",
+      "options": "AI Scenario",
+      "reqd": 1
+    },
+    {
+      "fieldname": "version",
+      "label": "Version",
+      "fieldtype": "Int",
+      "reqd": 1
+    },
+    {
+      "fieldname": "process",
+      "label": "Process",
+      "fieldtype": "Link",
+      "options": "BPO Process"
+    },
+    {
+      "fieldname": "company_wide",
+      "label": "Company Wide",
+      "fieldtype": "Check",
+      "default": "0"
+    },
+    {
+      "fieldname": "version_key",
+      "label": "Version Key",
+      "fieldtype": "Data",
+      "unique": 1
+    },
+    {
+      "fieldname": "content_json",
+      "label": "Content Json",
+      "fieldtype": "Long Text",
+      "reqd": 1
+    },
+    {
+      "fieldname": "content_hash",
+      "label": "Content Hash",
+      "fieldtype": "Data"
+    },
+    {
+      "fieldname": "published_by",
+      "label": "Published By",
+      "fieldtype": "Link",
+      "options": "User"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "BPO Administrator",
+      "read": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    }
+  ],
+  "track_changes": 1,
+  "allow_rename": 0
+}

@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "site_hostname": "training.everydayai.work",
+  "applications": {
+    "lms": {"repository": "https://github.com/frappe/lms", "tag": "v2.66.0", "commit": "aa8b53b0a7e940871cdb006962a212daccb52a09"},
+    "frappe": {"repository": "https://github.com/frappe/frappe", "tag": "v16.52.0", "commit": "4515014c87ece6cb20ee91d2cfb121c5cbd1ff4a"},
+    "payments": {"repository": "https://github.com/frappe/payments", "branch": "version-16", "commit": "cca07d9f9392e2ea0e521c5975151db9e4b6c321"}
+  },
+  "runtime": {"python": "3.14", "node": "24", "mariadb": "11.8", "redis": "7", "bench": "5.29.1"},
+  "image_digests": {},
+  "release_status": "development-unverified"
+}

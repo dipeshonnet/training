@@ -1,0 +1,74 @@
+{
+  "doctype": "DocType",
+  "name": "AI Action",
+  "module": "BPO Coach",
+  "autoname": "hash",
+  "engine": "InnoDB",
+  "field_order": [
+    "attempt",
+    "request_id",
+    "event_key",
+    "step_id",
+    "hotspot_id",
+    "input_value",
+    "correct",
+    "critical"
+  ],
+  "fields": [
+    {
+      "fieldname": "attempt",
+      "label": "Attempt",
+      "fieldtype": "Link",
+      "options": "AI Attempt",
+      "reqd": 1
+    },
+    {
+      "fieldname": "request_id",
+      "label": "Request Id",
+      "fieldtype": "Data",
+      "reqd": 1
+    },
+    {
+      "fieldname": "event_key",
+      "label": "Event Key",
+      "fieldtype": "Data",
+      "unique": 1
+    },
+    {
+      "fieldname": "step_id",
+      "label": "Step Id",
+      "fieldtype": "Data"
+    },
+    {
+      "fieldname": "hotspot_id",
+      "label": "Hotspot Id",
+      "fieldtype": "Data"
+    },
+    {
+      "fieldname": "input_value",
+      "label": "Input Value",
+      "fieldtype": "Small Text"
+    },
+    {
+      "fieldname": "correct",
+      "label": "Correct",
+      "fieldtype": "Check"
+    },
+    {
+      "fieldname": "critical",
+      "label": "Critical",
+      "fieldtype": "Check"
+    }
+  ],
+  "permissions": [
+    {
+      "role": "BPO Administrator",
+      "read": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1
+    }
+  ],
+  "track_changes": 1,
+  "allow_rename": 0
+}

@@ -1,0 +1,49 @@
+{
+  "doctype": "DocType",
+  "name": "BPO Process Access",
+  "module": "BPO Coach",
+  "autoname": "hash",
+  "engine": "InnoDB",
+  "field_order": [
+    "member",
+    "process",
+    "access_key"
+  ],
+  "fields": [
+    {
+      "fieldname": "member",
+      "label": "Member",
+      "fieldtype": "Link",
+      "options": "User",
+      "reqd": 1
+    },
+    {
+      "fieldname": "process",
+      "label": "Process",
+      "fieldtype": "Link",
+      "options": "BPO Process",
+      "reqd": 1
+    },
+    {
+      "fieldname": "access_key",
+      "label": "Access Key",
+      "fieldtype": "Data",
+      "unique": 1,
+      "hidden": 1
+    }
+  ],
+  "permissions": [
+    {
+      "role": "BPO Administrator",
+      "read": 1,
+      "report": 1,
+      "export": 1,
+      "print": 1,
+      "create": 1,
+      "write": 1,
+      "delete": 1
+    }
+  ],
+  "track_changes": 1,
+  "allow_rename": 0
+}

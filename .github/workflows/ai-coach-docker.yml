@@ -64,8 +64,11 @@ jobs:
           docker compose -f deploy/compose.yaml exec -T backend bench --site "$SITE_HOSTNAME" list-apps
       - name: Verify public and private file routing with a real session
         run: |
-          docker compose -f deploy/compose.yaml exec -T backend bench --site "$SITE_HOSTNAME" execute frappe.utils.file_manager.save_file --kwargs '{"fname":"ci-private-probe.txt","content":"ci-private-probe","dt":None,"dn":None,"is_private":1}'
-          docker compose -f deploy/compose.yaml exec -T backend bench --site "$SITE_HOSTNAME" execute frappe.utils.file_manager.save_file --kwargs '{"fname":"ci-public-probe.txt","content":"ci-public-probe","dt":None,"dn":None,"is_private":0}'
+          private_file=$(docker compose -f deploy/compose.yaml exec -T backend bench --site "$SITE_HOSTNAME" execute frappe.utils.file_manager.save_file --kwargs '{"fname":"ci-private-probe.txt","content":"ci-private-probe","dt":None,"dn":None,"is_private":1}')
+          public_file=$(docker compose -f deploy/compose.yaml exec -T backend bench --site "$SITE_HOSTNAME" execute frappe.utils.file_manager.save_file --kwargs '{"fname":"ci-public-probe.txt","content":"ci-public-probe","dt":None,"dn":None,"is_private":0}')
+          PRIVATE_PROBE_URL=$(python -c 'import json,sys; print(json.load(sys.stdin)["file_url"])' <<< "$private_file")
+          PUBLIC_PROBE_URL=$(python -c 'import json,sys; print(json.load(sys.stdin)["file_url"])' <<< "$public_file")
+          export PRIVATE_PROBE_URL PUBLIC_PROBE_URL
           python deploy/smoke_http.py
       - name: Repeat initialization and verify restart recovery
         run: |

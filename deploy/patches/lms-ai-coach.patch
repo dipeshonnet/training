@@ -311,3 +311,25 @@
  		hash = frappe.generate_hash(length=6)
  		cls.student = cls._create_user(f"bawd-{hash}@example.com", "Bea", "Student", ["LMS Student"])
  		cls.badge = cls._create_badge(f"Award Badge {hash}", "User", "email", "doc.enabled")
+--- a/frontend/src/main.js
++++ b/frontend/src/main.js
+@@ -17,14 +17,17 @@
+ setConfig('resourceFetcher', frappeRequest)
+ setConfig('maxFileSize', window.max_file_size)
+ 
+-app.use(FrappeUI)
++// LMS provides its own configured socket; avoid a second client on port 9000.
++app.use(FrappeUI, { socketio: false })
+ app.use(pinia)
+ app.use(router)
+ app.use(translationPlugin)
+ app.use(pageMetaPlugin)
+ registerDirectives(app)
+ app.provide('$dayjs', dayjs)
+-app.provide('$socket', initSocket())
++const socket = initSocket()
++app.provide('$socket', socket)
++app.config.globalProperties.$socket = socket
+ app.mount('#app')
+ 
+ const { userResource, allUsers } = usersStore()

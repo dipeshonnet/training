@@ -17,15 +17,19 @@ Work remains on `ai-coach-v2` in `https://github.com/dipeshonnet/training`. Keep
 - Version-specific LMS compatibility patches address search-index continuation, DocPerm helper imports, certificate mapper documents, binary image attachments, ZIP upload fixtures and imported asset URL preservation. Media tests cover reuse of identical orphan files and rejection of different existing bytes. Redaction tests still assert that real secret canaries are hidden and authorized authors/graders retain access; null redacted keys are normalized for released Frappe.
 - Native frontend uses the browser origin for production realtime traffic. A hash-checked Frappe Node patch forwards the validated site header to the configured internal backend. Nginx preserves supplied browser origins. `deploy/smoke_socketio.py` exercises authenticated namespace connections and denial of invalid origins and guests.
 - New internal sites disable signup/guest catalog access and skip native persona collection, which otherwise submits to an external service. Completed setups retain administrator choices. The disposable existing local training site was explicitly brought to these defaults.
-- Standalone rules: 14 pass. Deployment contracts: 10 checks (Windows symlink check skips; actual Linux asset materialization passed). Custom frontend: four bridge tests and production build pass. Native frontend checkpoint CI passed 1,571 tests across 153 files and a production build at `3106b9e`; rebuilt locally with a 4 GB Node heap after the default heap exhausted memory.
+- Standalone rules: 14 pass. Deployment contracts: 10 checks (Windows symlink check skips; actual Linux asset materialization passed). Custom frontend: four bridge tests and production build pass. Native frontend checkpoint CI passed 1,571 tests across 153 files and a production build at `fcb44ed` and `fa62cac`. The local production bundle also builds with a 4 GB Node heap.
 
-### Verification still being finalized
+### Native server verification
 
-The latest native full-suite run passed 75 unit tests, 167 additional unit tests and the ordinary test group, but one integration setup hit a stale rolled-back badge cache. The pinned test cleanup now clears that map; rerun the full suite and record the final results here. The latest Docker CI at `3106b9e` stopped on its old fixed-IP DNS probe; that portability fix and realtime gate need a new CI run.
+The full local native LMS suite passes on the pinned stack: 75 unit tests, 961 integration tests, 78 ordinary tests (three upstream skips) and 167 additional unit tests; 1,281 tests total. The badge fixture cleanup clears the released Frappe client-cache map after rollback. All nine custom integration tests pass with the internal-site settings assertions.
 
-The local app/frontend images include small development verification overlays. A fresh Docker/CI build from the final committed sources remains the reproducibility gate; never publish the local overlay tags as release images. Test execution is enabled only on disposable sites. Remove the `lms-baseline.local` test site and disable `allow_tests` before any public exposure.
+Checkpoint and full Docker foundation CI are green at `fa62cac`: [Docker foundation run](https://github.com/dipeshonnet/training/actions/runs/39625327047). Both images were built from committed sources, followed by fresh initialization, asset/file/login checks, repeated initialization/restart, forced backend address replacement, authenticated realtime/invalid-origin/guest checks, nine custom tests and the full native suite. Nginx connection attempts are bounded to three seconds; the DNS probe requires sustained recovery before checking session/file controls.
 
-Next: finish the foundation regression/CI checks, then continue the access-control, feature, backup/restore and browser/provider gates below. Keep the tunnel profile off until those gates pass.
+The browser additionally exposed Frappe UI's automatically created second socket on port 9000. The final frontend patch disables that duplicate and shares LMS's configured client between Vue injection and global properties. Rebuild and verify no port-9000 requests remain; all preceding server gates are green.
+
+Local app/frontend tags include development verification overlays and must not be published as release images. `allow_tests` was disabled again on both local sites after the successful run. Keep `lms-baseline.local` disposable and remove it before public exposure.
+
+Next: finish the final foundation CI/live browser checks, then continue the access-control, feature, backup/restore and browser/provider gates below. Keep the tunnel profile off until those gates pass.
 
 ## 1. Clone the correct branch
 
@@ -95,7 +99,7 @@ Observed before handoff:
 - Python source compilation passes.
 - Native frontend tests/build, custom Frappe integration, HTTP controls and basic desktop portal navigation have run. Full native server verification is being finalized. Microphone, live Groq, load and the remaining feature interactions are outstanding.
 
-The custom frontend now has four EditorJS bridge tests. Run `npm test` as well as `npm run build`. The microphone, builder, simulation and SOP interaction tests remain outstanding. Run deployment contract checks with `python -m unittest discover -s deploy -p 'test_*.py' -v`; the patch tests need the pinned LMS commit available in Git history.
+The custom frontend has four EditorJS bridge tests. Desktop and 390 px mobile portal/Scenario studio navigation were checked; neither mobile screen overflowed horizontally. Run `npm test` as well as `npm run build`. The microphone, builder, simulation and SOP interaction tests remain outstanding. Run deployment contract checks with `python -m unittest discover -s deploy -p 'test_*.py' -v`; the patch tests need the pinned LMS commit available in Git history.
 
 The parity fixture is committed and does not require the original pilot checkout to run. `deploy/generate_parity.mjs` is a developer utility that needs the original pilot source path if regenerating fixtures; do not regenerate expected outputs to hide a scoring regression.
 
@@ -106,7 +110,7 @@ The parity fixture is committed and does not require the original pilot checkout
 3. **Docker asset/file foundation passes locally:** asset materialization and Nginx public/private/internal routing probes pass. Keep these checks in CI and verify scoped uploaded course media with representative non-administrator users.
 4. **Frappe install/bootstrap passes locally:** custom DocTypes/roles, separate app installation, migration and retry recovery have run. Continue native batch/course/enrollment and interrupted-upgrade coverage against the pinned versions.
 5. **Missing operational features:** encrypted backup/restore and R2 upload tooling, portable setup/upgrade commands, the read-only pilot exporter/importer, verified release-image publication and digest recording are not implemented. Import/reminder record metadata alone is not an importer.
-6. **CI remains partial:** checkpoint CI now includes rules/install/deployment/bridge tests and a patched native frontend test/build. Docker foundation CI has verified builds, initialization, HTTP and restart; the updated DNS/realtime/full native gates need a green final run. Browser, full native permission integration and release publication gates remain outstanding. Inherited upstream release/image jobs have fork guards.
+6. **CI remains partial:** checkpoint CI now includes rules/install/deployment/bridge tests and a patched native frontend test/build. Docker foundation CI is green through fresh builds, initialization, HTTP/restart, DNS/realtime and the full native suite at `fa62cac`; keep the final frontend delta green too. Browser, full native permission integration and release publication gates remain outstanding. Inherited upstream release/image jobs have fork guards.
 
 Other targeted follow-ups:
 

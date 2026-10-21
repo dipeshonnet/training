@@ -62,5 +62,9 @@
   "lms/tests/security/test_badge_award_permission.py": {
     "before": "5f3b88aae1ce82b3dc84b844d4c4b3ddfd6e19b23150d7697399c8109ef1b71a",
     "after": "b9c3e51e8e60dad1c2b9c152e24d513b64cfb68a0832466663c93d15f89d37ea"
+  },
+  "frontend/src/main.js": {
+    "before": "aad3b0c2f02df54bcc1143567fae01035152f51181f9f7bc2b6b374b113ba367",
+    "after": "774ddea4d821bf151893fb523550d6bd921235a3dcc0ed12f3ea1e57ed0bbedd"
   }
 }

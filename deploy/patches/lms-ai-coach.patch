@@ -71,3 +71,14 @@
  		except Exception as e:
  			frappe.throw(e)
  
+--- a/lms/tests/test_docperm_snapshot.py
++++ b/lms/tests/test_docperm_snapshot.py
+@@ -5,7 +5,7 @@
+ from pathlib import Path
+ 
+ import frappe
+-from frappe.modules.utils import get_module_list
++from lms.lms.docperm_shadow import get_module_list
+ from frappe.tests.utils import FrappeTestCase
+ 
+ BASELINE = Path(__file__).parent / "docperms.json"

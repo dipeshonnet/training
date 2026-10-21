@@ -14,5 +14,9 @@
   "lms/sqlite.py": {
     "before": "8e94956316e6694347ec54780e2e50a74cee76f174c1c670f2a00a27034d1652",
     "after": "3bfc0ebbf9da689a8aef9536df79c26f00361d8eccb7282e0f528365378b64cf"
+  },
+  "lms/tests/test_docperm_snapshot.py": {
+    "before": "38dc08878925f97d4aaa9614c2fe9073403318d292512e674f400181a1d58f3f",
+    "after": "a4c13dfd4641b32430bc69c7b58a02753399664d99a02d7a7eb9afd265892344"
   }
 }

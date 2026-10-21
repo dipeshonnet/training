@@ -84,10 +84,10 @@ def me():
 @frappe.whitelist()
 def workspace():
     user = require_user()
-    assignments = frappe.get_all('BPO Training Assignment', fields=['name', 'member', 'batch', 'process', 'course', 'scenario_version', 'channels_json', 'bindings_json', 'mandatory', 'due_date', 'creation'], order_by='creation desc')
+    assignments = frappe.get_all('BPO Training Assignment', fields=['name', 'member', 'batch', 'bpo_process as process', 'course', 'scenario_version', 'channels_json', 'bindings_json', 'mandatory', 'due_date', 'creation'], order_by='creation desc')
     from bpo_coach.completion import assignment_complete
     assignments = [dict(a, completed=assignment_complete(a)) for a in assignments if a.member == user or process_allowed(a.process)]
-    attempts = frappe.get_all('AI Attempt', fields=['name', 'member', 'assignment', 'process', 'lesson', 'activity_id', 'scenario_version', 'mode', 'channel', 'status', 'grading_status', 'grading_error', 'result_json', 'submitted_at', 'creation'], order_by='creation desc')
+    attempts = frappe.get_all('AI Attempt', fields=['name', 'member', 'assignment', 'bpo_process as process', 'lesson', 'activity_id', 'scenario_version', 'mode', 'channel', 'status', 'grading_status', 'grading_error', 'result_json', 'submitted_at', 'creation'], order_by='creation desc')
     attempts = [dict(a, result=load_json(a.result_json)) for a in attempts if a.member == user or process_allowed(a.process)]
     for a in attempts:
         a.pop('result_json', None)
@@ -95,7 +95,7 @@ def workspace():
     processes = [p for p in processes if process_allowed(p.name)] if is_staff() else []
     scenarios = []
     if is_staff():
-        scenarios = [s for s in frappe.get_all('AI Scenario', fields=['name', 'title', 'process', 'company_wide', 'draft_revision', 'published_version'], order_by='modified desc') if process_allowed(s.process)]
+        scenarios = [s for s in frappe.get_all('AI Scenario', fields=['name', 'title', 'bpo_process as process', 'company_wide', 'draft_revision', 'published_version'], order_by='modified desc') if process_allowed(s.process)]
     courses = [c for c in frappe.get_all('LMS Course', fields=['name', 'title', 'published', 'bpo_process', 'bpo_company_wide', 'bpo_locked'])
         if __import__('bpo_coach.permissions', fromlist=['scope_course']).scope_course(c.name)]
     batches = [b for b in frappe.get_all('LMS Batch', fields=['name', 'title', 'bpo_process']) if process_allowed(b.bpo_process)] if is_staff() else []
@@ -121,7 +121,7 @@ def manage(kind: str, data):
     if kind == 'process':
         return {'name': insert('BPO Process', title=str(data['title'])[:140], client=data['client'], enabled=1).name}
     if kind == 'access':
-        return {'name': insert('BPO Process Access', member=data['member'], process=data['process']).name}
+        return {'name': insert('BPO Process Access', member=data['member'], bpo_process=data['process']).name}
     if kind == 'user':
         roles = {'learner': ['BPO Learner', 'LMS Student'], 'trainer': ['BPO Trainer', 'Course Creator'], 'admin': ['BPO Administrator', 'Moderator']}
         if data.get('role') not in roles:
@@ -166,8 +166,8 @@ def manage(kind: str, data):
 def get_scenario(name: str):
     require_user()
     s = frappe.get_doc('AI Scenario', name)
-    require_staff(s.process)
-    return {'name': s.name, 'process': s.process, 'company_wide': s.company_wide, 'content': load_json(s.draft_json), 'revision': s.draft_revision, 'published_version': s.published_version}
+    require_staff(s.bpo_process)
+    return {'name': s.name, 'process': s.bpo_process, 'company_wide': s.company_wide, 'content': load_json(s.draft_json), 'revision': s.draft_revision, 'published_version': s.published_version}
 
 @frappe.whitelist()
 def save_scenario(content, process: str = None, name: str = None, revision: int = 0, company_wide: int = 0):
@@ -182,20 +182,20 @@ def save_scenario(content, process: str = None, name: str = None, revision: int 
     for step in content['steps']:
         if step['assetId']:
             asset = frappe.get_doc('AI Asset', step['assetId'])
-            if asset.process != process and not asset.company_wide:
+            if asset.bpo_process != process and not asset.company_wide:
                 frappe.throw('Screenshot belongs to another process.')
     if name:
         frappe.db.get_value('AI Scenario', name, 'name', for_update=True)
         s = frappe.get_doc('AI Scenario', name)
-        require_staff(s.process)
-        if s.process != process or bool(s.company_wide) != bool(company_wide):
+        require_staff(s.bpo_process)
+        if s.bpo_process != process or bool(s.company_wide) != bool(company_wide):
             frappe.throw('Scenario scope cannot be changed.')
         if s.draft_revision != int(revision):
             frappe.throw('Another edit was saved. Reload before saving again.')
         s.update(dict(title=content['title'], draft_json=json.dumps(content), draft_revision=s.draft_revision + 1))
         save(s)
     else:
-        s = insert('AI Scenario', title=content['title'], process=process, company_wide=company_wide, draft_json=json.dumps(content), draft_revision=1)
+        s = insert('AI Scenario', title=content['title'], bpo_process=process, company_wide=company_wide, draft_json=json.dumps(content), draft_revision=1)
     return {'name': s.name, 'revision': s.draft_revision}
 
 @frappe.whitelist()
@@ -203,7 +203,7 @@ def publish(name: str, revision: int):
     post()
     frappe.db.get_value('AI Scenario', name, 'name', for_update=True)
     s = frappe.get_doc('AI Scenario', name)
-    require_staff(s.process)
+    require_staff(s.bpo_process)
     if s.company_wide:
         require_admin()
     if s.draft_revision != int(revision):
@@ -213,7 +213,7 @@ def publish(name: str, revision: int):
     except ValueError as e:
         frappe.throw(str(e))
     number = frappe.db.count('AI Scenario Version', {'scenario': s.name}) + 1
-    v = insert('AI Scenario Version', scenario=s.name, version=number, version_key=f'{s.name}:{number}', process=s.process,
+    v = insert('AI Scenario Version', scenario=s.name, version=number, version_key=f'{s.name}:{number}', bpo_process=s.bpo_process,
         company_wide=s.company_wide, content_json=json.dumps(content), content_hash=fingerprint(content), published_by=frappe.session.user)
     s.published_version = v.name
     save(s)
@@ -237,7 +237,7 @@ def upload_asset(process: str = None, company_wide: int = 0):
     if image.format not in ('PNG', 'JPEG', 'WEBP') or image.width * image.height > 40_000_000:
         frappe.throw('Unsupported screenshot format or dimensions.')
     image.verify()
-    a = insert('AI Asset', process=process, company_wide=company_wide, filename=file.filename,
+    a = insert('AI Asset', bpo_process=process, company_wide=company_wide, filename=file.filename,
         checksum=hashlib.sha256(content).hexdigest())
     with trusted_write():
         stored = save_file(file.filename, content, 'AI Asset', a.name, is_private=1)
@@ -279,7 +279,7 @@ def assign(request_id: str, course: str = None, scenario_version: str = None, ba
             activity_bindings.extend(bindings(frappe.get_doc('Course Lesson', lesson)))
     else:
         v = frappe.get_doc('AI Scenario Version', scenario_version)
-        if not v.company_wide and v.process != process:
+        if not v.company_wide and v.bpo_process != process:
             frappe.throw('Scenario belongs to another process.')
         office = load_json(v.content_json)['office']
         channels = list(dict.fromkeys(channels))
@@ -298,7 +298,7 @@ def assign(request_id: str, course: str = None, scenario_version: str = None, ba
             continue
         if course and not frappe.db.exists('LMS Enrollment', {'course': course, 'member': learner}):
             frappe.get_doc(dict(doctype='LMS Enrollment', course=course, member=learner, member_type='Student')).insert(ignore_permissions=True)
-        a = insert('BPO Training Assignment', member=learner, batch=batch, process=process, course=course,
+        a = insert('BPO Training Assignment', member=learner, batch=batch, bpo_process=process, course=course,
             scenario_version=scenario_version, channels_json=json.dumps(channels), bindings_json=json.dumps(activity_bindings),
             mandatory=int(bool(int(mandatory))), due_date=get_datetime(due_date) if due_date else None,
             assignment_key=key, assigned_by=frappe.session.user)
@@ -329,7 +329,7 @@ def start(assignment: str, mode: str, channel: str, scenario_version: str = None
     with frappe.cache.lock('bpo-start:' + key, timeout=20, blocking_timeout=5):
         name = frappe.db.get_value('AI Attempt', {'active_key': key}, 'name')
         if not name:
-            attempt = insert('AI Attempt', member=a.member, process=a.process, assignment=a.name, lesson=lesson,
+            attempt = insert('AI Attempt', member=a.member, bpo_process=a.bpo_process, assignment=a.name, lesson=lesson,
                 activity_id=activity_id, scenario_version=version, mode=mode, channel=channel, started_at=now_datetime(), active_key=key)
             name = attempt.name
         frappe.db.commit()
@@ -346,7 +346,7 @@ def get_attempt(name: str):
         result['events'] = [{k: v for k, v in e.items() if k not in ('correct', 'critical')} for e in result['events']]
     if a.channel != 'workflow':
         result['opening'] = s['opening']
-    if a.member != frappe.session.user and process_allowed(a.process):
+    if a.member != frappe.session.user and process_allowed(a.bpo_process):
         result['review_context'] = {k: s[k] for k in ('reference', 'outcome', 'threshold')}
     return result
 
@@ -501,7 +501,7 @@ def review(attempt: str, decision: str, note: str = ''):
         frappe.throw('Invalid review decision.')
     with attempt_lock(attempt):
         a = attempt_access(attempt)
-        require_staff(a.process)
+        require_staff(a.bpo_process)
         if a.mode != 'assessment' or a.status != 'submitted' or a.grading_status != 'completed':
             frappe.throw('Only graded, submitted assessments can be reviewed.')
         result = load_json(a.result_json)

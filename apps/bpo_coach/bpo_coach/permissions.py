@@ -23,7 +23,7 @@ def course_query(user=None):
         return '1=0'
     u = frappe.db.escape(user)
     return f"""(`tabLMS Course`.bpo_company_wide=1 OR `tabLMS Course`.bpo_process IN
-      (SELECT process FROM `tabBPO Process Access` WHERE member={u}) OR `tabLMS Course`.name IN
+      (SELECT bpo_process FROM `tabBPO Process Access` WHERE member={u}) OR `tabLMS Course`.name IN
       (SELECT course FROM `tabBPO Training Assignment` WHERE member={u}))"""
 
 def native_permission(doc, ptype='read', user=None):
@@ -94,7 +94,7 @@ def validate_scope(doc, method=None):
             from bpo_coach.completion import bindings
             for b in bindings(doc):
                 version = frappe.get_doc('AI Scenario Version', b['version'])
-                if version.process and version.process != frappe.db.get_value('LMS Course', course, 'bpo_process'):
+                if version.bpo_process and version.bpo_process != frappe.db.get_value('LMS Course', course, 'bpo_process'):
                     frappe.throw('AI activity belongs to another process.')
     elif doc.doctype == 'File' and doc.attached_to_doctype in ('AI Asset', 'LMS Course', 'Course Lesson', 'Course Chapter') and not doc.is_private:
         frappe.throw('Training files must use private storage.')
@@ -111,14 +111,14 @@ def custom_permission(doc, ptype='read', user=None):
     if ptype not in ('read', 'select', 'print'):
         return False
     if doc.doctype in ('AI Scenario', 'AI Scenario Version'):
-        return process_allowed(doc.get('process'), user)
+        return process_allowed(doc.get('bpo_process'), user)
     if doc.doctype == 'AI Asset':
         return asset_allowed(doc, user)
     if doc.doctype in ('AI Action', 'AI Dialogue', 'AI Operation'):
         return False
     if doc.get('member') == user:
         return True
-    return process_allowed(doc.get('process'), user)
+    return process_allowed(doc.get('bpo_process'), user)
 
 def deny_query(user=None):
     return '' if is_admin(user) else '1=0'

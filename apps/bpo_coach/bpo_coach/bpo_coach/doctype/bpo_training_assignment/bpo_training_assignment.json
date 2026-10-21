@@ -7,7 +7,7 @@
   "field_order": [
     "member",
     "batch",
-    "process",
+    "bpo_process",
     "course",
     "scenario_version",
     "channels_json",
@@ -32,7 +32,7 @@
       "options": "LMS Batch"
     },
     {
-      "fieldname": "process",
+      "fieldname": "bpo_process",
       "label": "Process",
       "fieldtype": "Link",
       "options": "BPO Process"

@@ -5,7 +5,7 @@
   "autoname": "hash",
   "engine": "InnoDB",
   "field_order": [
-    "process",
+    "bpo_process",
     "company_wide",
     "file",
     "filename",
@@ -13,7 +13,7 @@
   ],
   "fields": [
     {
-      "fieldname": "process",
+      "fieldname": "bpo_process",
       "label": "Process",
       "fieldtype": "Link",
       "options": "BPO Process"

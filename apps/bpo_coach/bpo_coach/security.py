@@ -45,7 +45,7 @@ def process_allowed(process, user=None):
     if is_admin(user):
         return True
     return bool(process and 'BPO Trainer' in frappe.get_roles(user) and frappe.db.exists(
-        'BPO Process Access', {'member': user, 'process': process}))
+        'BPO Process Access', {'member': user, 'bpo_process': process}))
 
 def insert(doctype, **values):
     with trusted_write():
@@ -66,7 +66,7 @@ def fingerprint(value):
 def assignment_access(name, user=None):
     doc = frappe.get_doc('BPO Training Assignment', name)
     user = user or frappe.session.user
-    if doc.member != user and not process_allowed(doc.process, user):
+    if doc.member != user and not process_allowed(doc.bpo_process, user):
         frappe.throw('Assignment access denied.', frappe.PermissionError)
     return doc
 
@@ -83,7 +83,7 @@ def version_for_assignment(assignment, version_name, lesson=None):
 
 def asset_allowed(asset, user=None):
     user = user or frappe.session.user
-    if process_allowed(asset.process, user):
+    if process_allowed(asset.bpo_process, user):
         return True
     for a in frappe.get_all('BPO Training Assignment', filters={'member': user}, fields=['scenario_version', 'bindings_json']):
         versions = [a.scenario_version] if a.scenario_version else [b['version'] for b in load_json(a.bindings_json, [])]

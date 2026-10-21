@@ -6,7 +6,7 @@
   "engine": "InnoDB",
   "field_order": [
     "member",
-    "process",
+    "bpo_process",
     "assignment",
     "lesson",
     "scenario_version",
@@ -36,7 +36,7 @@
       "reqd": 1
     },
     {
-      "fieldname": "process",
+      "fieldname": "bpo_process",
       "label": "Process",
       "fieldtype": "Link",
       "options": "BPO Process"

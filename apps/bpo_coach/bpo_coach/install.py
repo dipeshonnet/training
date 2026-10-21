@@ -40,6 +40,6 @@ def after_migrate():
         ],
         'LMS Batch': [dict(fieldname='bpo_process', label='BPO Process', fieldtype='Link', options='BPO Process', insert_after='title')],
     }, update=True)
-    for dt, columns in [('AI Attempt', ['assignment', 'member', 'scenario_version', 'channel']), ('AI Action', ['attempt']), ('AI Dialogue', ['attempt', 'sequence']), ('BPO Training Assignment', ['member', 'course']), ('BPO Process Access', ['member', 'process'])]:
+    for dt, columns in [('AI Attempt', ['assignment', 'member', 'scenario_version', 'channel']), ('AI Action', ['attempt']), ('AI Dialogue', ['attempt', 'sequence']), ('BPO Training Assignment', ['member', 'course']), ('BPO Process Access', ['member', 'bpo_process'])]:
         frappe.db.add_index(dt, columns)
     setup_defaults()

@@ -14,7 +14,7 @@ class BPORecord(Document):
         if self.doctype in {'BPO Client', 'BPO Process', 'BPO Process Access', 'AI Provider Settings'} and not is_admin():
             frappe.throw('Administrator access required.', frappe.PermissionError)
         if self.doctype == 'BPO Process Access':
-            self.access_key = self.member + '|' + self.process
+            self.access_key = self.member + '|' + self.bpo_process
         if self.doctype == 'AI Provider Settings':
             self.text_model = self.text_model or 'openai/gpt-oss-120b'
             self.stt_model = self.stt_model or 'whisper-large-v3-turbo'

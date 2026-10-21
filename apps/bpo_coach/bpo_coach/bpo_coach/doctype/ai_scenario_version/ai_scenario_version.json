@@ -7,7 +7,7 @@
   "field_order": [
     "scenario",
     "version",
-    "process",
+    "bpo_process",
     "company_wide",
     "version_key",
     "content_json",
@@ -29,7 +29,7 @@
       "reqd": 1
     },
     {
-      "fieldname": "process",
+      "fieldname": "bpo_process",
       "label": "Process",
       "fieldtype": "Link",
       "options": "BPO Process"

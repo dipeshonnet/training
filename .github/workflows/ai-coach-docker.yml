@@ -52,9 +52,12 @@ jobs:
           docker compose -f deploy/compose.yaml restart backend worker scheduler websocket frontend
           docker compose -f deploy/compose.yaml up --no-build -d --wait --wait-timeout 120
           curl --fail --silent --show-error -H "Host: $SITE_HOSTNAME" http://127.0.0.1:8080/api/method/ping
-      - name: Run native LMS server tests on the pinned stack
+      - name: Run custom app integration tests on the pinned stack
         run: |
           docker compose -f deploy/compose.yaml exec -T backend bench --site "$SITE_HOSTNAME" set-config allow_tests true
+          docker compose -f deploy/compose.yaml exec -T backend bench --site "$SITE_HOSTNAME" run-tests --app bpo_coach
+      - name: Run native LMS server tests on the pinned stack
+        run: |
           docker compose -f deploy/compose.yaml exec -T backend bench --site "$SITE_HOSTNAME" run-tests --app lms
       - name: Show diagnostics
         if: always()

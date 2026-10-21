@@ -8,6 +8,8 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import time
+from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 COMPOSE = ['docker', 'compose', '-f', 'deploy/compose.yaml']
@@ -27,6 +29,29 @@ def backend_address():
     return network, endpoint['IPAddress']
 
 
+def wait_for_recovery(origin, host):
+    # Existing Nginx workers can briefly retain both replica addresses. Require
+    # sustained success across a DNS refresh before exercising session controls.
+    deadline = time.monotonic() + 60
+    stable_since = None
+    request = Request(origin + '/api/method/ping', headers={'Host': host})
+    while time.monotonic() < deadline:
+        try:
+            with urlopen(request, timeout=3) as response:
+                assert response.status == 200 and json.load(response)['message'] == 'pong'
+            stable_since = stable_since or time.monotonic()
+            if time.monotonic() - stable_since >= 5:
+                return
+        except HTTPError as error:
+            if error.code not in (502, 503, 504):
+                raise
+            stable_since = None
+        except (URLError, TimeoutError, ConnectionError):
+            stable_since = None
+        time.sleep(1)
+    raise AssertionError('Nginx did not sustain backend recovery within 60 seconds.')
+
+
 def check():
     network, old_address = backend_address()
     old_container = capture(*COMPOSE, 'ps', '-q', 'backend')
@@ -41,9 +66,7 @@ def check():
         _, new_address = backend_address()
         assert new_address != old_address, 'The backend address did not change.'
         origin = os.environ.get('SMOKE_ORIGIN', 'http://127.0.0.1:8080')
-        request = Request(origin + '/api/method/ping', headers={'Host': os.environ['SITE_HOSTNAME']})
-        with urlopen(request, timeout=20) as response:
-            assert response.status == 200 and json.load(response)['message'] == 'pong'
+        wait_for_recovery(origin, os.environ['SITE_HOSTNAME'])
         subprocess.run([sys.executable, str(Path(__file__).with_name('smoke_http.py'))], check=True)
         print(f'Nginx recovered after backend address changed from {old_address} to {new_address}.')
     finally:

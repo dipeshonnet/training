@@ -41,7 +41,7 @@ def main():
         initialize(ROOT, os.environ['SITE_HOSTNAME'], Path('/home/frappe/assets-built'), os.environ)
         return
     commands = {
-        'web': ['env/bin/gunicorn', '--bind', '0.0.0.0:8000', '--workers', '2', '--timeout', '120', 'frappe.app:application'],
+        'web': ['env/bin/gunicorn', '--chdir', 'sites', '--bind', '0.0.0.0:8000', '--workers', '2', '--timeout', '120', 'frappe.app:application'],
         'worker': ['bench', 'worker', '--queue', 'short,default,long'],
         'scheduler': ['bench', 'schedule'],
         'websocket': ['node', 'apps/frappe/socketio.js'],

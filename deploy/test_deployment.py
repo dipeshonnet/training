@@ -1,5 +1,6 @@
 """Offline deployment contract checks; these do not replace a live Bench run."""
 import json
+import ast
 from pathlib import Path
 import shutil
 import subprocess
@@ -55,6 +56,24 @@ class BridgePatch(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'partially applied'):
             apply(self.root)
 
+    def test_search_index_continuation_is_forwarded(self):
+        apply(self.root)
+        source = ast.parse((self.root / 'lms/sqlite.py').read_text())
+        search = next(node for node in source.body if isinstance(node, ast.ClassDef) and node.name == 'LearningSearch')
+        search.body = [node for node in search.body if isinstance(node, ast.FunctionDef) and node.name == 'build_index']
+        calls = []
+
+        class BaseSearch:
+            def build_index(self, is_continuation=False):
+                calls.append(is_continuation)
+
+        namespace = {'SQLiteSearch': BaseSearch}
+        exec(compile(ast.Module(body=[search], type_ignores=[]), '<patched LearningSearch>', 'exec'), namespace)
+        instance = namespace['LearningSearch']()
+        instance.build_index()
+        instance.build_index(is_continuation=True)
+        self.assertEqual(calls, [False, True])
+
 
 class Bootstrap(unittest.TestCase):
     def setUp(self):
@@ -108,6 +127,9 @@ class Bootstrap(unittest.TestCase):
                 main()
             init.assert_not_called()
             self.assertEqual(execute.call_args.args[0], executable)
+            if executable == 'env/bin/gunicorn':
+                command = execute.call_args.args[1]
+                self.assertEqual(command[command.index('--chdir') + 1], 'sites')
 
 
 class Assets(unittest.TestCase):

@@ -10,5 +10,9 @@
   "frontend/src/utils/mobileNav.ts": {
     "before": "9354f0b1ed848d087e8fa8d100dc06f8afd48b060055126a8bf91b3d2296e37d",
     "after": "1069051f36937eaa2e42a16b0c71cb528c93e8da174a2783679462e93d109162"
+  },
+  "lms/sqlite.py": {
+    "before": "8e94956316e6694347ec54780e2e50a74cee76f174c1c670f2a00a27034d1652",
+    "after": "3bfc0ebbf9da689a8aef9536df79c26f00361d8eccb7282e0f528365378b64cf"
   }
 }

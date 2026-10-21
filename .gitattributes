@@ -1,0 +1,2 @@
+# Unified diff context lines intentionally contain a space followed by tabs.
+deploy/patches/*.patch text eol=lf -whitespace

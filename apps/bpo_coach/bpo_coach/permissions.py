@@ -7,11 +7,13 @@ def scope_course(course, user=None, write=False):
         return False
     if is_admin(user):
         return True
-    row = frappe.db.get_value('LMS Course', course, ['bpo_process', 'bpo_company_wide'], as_dict=True)
+    row = frappe.db.get_value('LMS Course', course, ['bpo_process', 'bpo_company_wide', 'published'], as_dict=True)
     if not row:
         return False
     if write:
         return bool(not row.bpo_company_wide and process_allowed(row.bpo_process, user))
+    if not row.published and not process_allowed(row.bpo_process, user):
+        return False
     return bool(row.bpo_company_wide or process_allowed(row.bpo_process, user) or frappe.db.exists(
         'BPO Training Assignment', {'course': course, 'member': user}))
 
@@ -22,9 +24,13 @@ def course_query(user=None):
     if user == 'Guest':
         return '1=0'
     u = frappe.db.escape(user)
-    return f"""(`tabLMS Course`.bpo_company_wide=1 OR `tabLMS Course`.bpo_process IN
-      (SELECT bpo_process FROM `tabBPO Process Access` WHERE member={u}) OR `tabLMS Course`.name IN
-      (SELECT course FROM `tabBPO Training Assignment` WHERE member={u}))"""
+    clauses = ['(`tabLMS Course`.bpo_company_wide=1 AND `tabLMS Course`.published=1)',
+               f"""(`tabLMS Course`.published=1 AND `tabLMS Course`.name IN
+                 (SELECT course FROM `tabBPO Training Assignment` WHERE member={u}))"""]
+    if is_staff(user):
+        clauses.append(f"""`tabLMS Course`.bpo_process IN
+          (SELECT bpo_process FROM `tabBPO Process Access` WHERE member={u})""")
+    return '(' + ' OR '.join(clauses) + ')'
 
 def native_permission(doc, ptype='read', user=None):
     user = user or frappe.session.user

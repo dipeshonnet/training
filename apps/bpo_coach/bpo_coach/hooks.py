@@ -11,6 +11,11 @@ after_migrate = 'bpo_coach.install.after_migrate'
 before_request = ['bpo_coach.permissions.before_request']
 website_route_rules = [{'from_route': '/coach/<path:app_path>', 'to_route': 'coach'}]
 website_redirects = [{'source': '/', 'target': '/coach'}]
+override_whitelisted_methods = {
+    'lms.lms.utils.' + method: 'bpo_coach.native.' + method
+    for method in ('get_courses', 'get_course_count', 'get_course_details',
+                   'get_course_outline', 'get_lesson', 'get_course_categories')
+}
 scheduler_events = {'all': ['bpo_coach.jobs.recover_grading', 'bpo_coach.jobs.reminders']}
 
 _native = ['LMS Course', 'LMS Batch', 'Course Chapter', 'Course Lesson', 'LMS Course Progress', 'LMS Enrollment', 'LMS Certificate', 'LMS Quiz Submission', 'LMS Assignment Submission', 'File']

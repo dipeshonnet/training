@@ -64,8 +64,8 @@ jobs:
           docker compose -f deploy/compose.yaml exec -T backend bench --site "$SITE_HOSTNAME" list-apps
       - name: Verify public and private file routing with a real session
         run: |
-          docker compose -f deploy/compose.yaml exec -T backend bench --site "$SITE_HOSTNAME" execute frappe.utils.file_manager.save_file --kwargs '{"fname":"ci-private-probe.txt","content":"ci-private-probe","dt":null,"dn":null,"is_private":1}'
-          docker compose -f deploy/compose.yaml exec -T backend bench --site "$SITE_HOSTNAME" execute frappe.utils.file_manager.save_file --kwargs '{"fname":"ci-public-probe.txt","content":"ci-public-probe","dt":null,"dn":null,"is_private":0}'
+          docker compose -f deploy/compose.yaml exec -T backend bench --site "$SITE_HOSTNAME" execute frappe.utils.file_manager.save_file --kwargs '{"fname":"ci-private-probe.txt","content":"ci-private-probe","dt":None,"dn":None,"is_private":1}'
+          docker compose -f deploy/compose.yaml exec -T backend bench --site "$SITE_HOSTNAME" execute frappe.utils.file_manager.save_file --kwargs '{"fname":"ci-public-probe.txt","content":"ci-public-probe","dt":None,"dn":None,"is_private":0}'
           python deploy/smoke_http.py
       - name: Repeat initialization and verify restart recovery
         run: |

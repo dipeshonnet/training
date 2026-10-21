@@ -9,7 +9,7 @@ USER frappe
 WORKDIR /home/frappe
 RUN bench init --frappe-branch v16.52.0 --python /usr/local/bin/python3 --no-backups --skip-assets --skip-redis-config-generation frappe-bench && test "$(git -C frappe-bench/apps/frappe rev-parse HEAD)" = 4515014c87ece6cb20ee91d2cfb121c5cbd1ff4a
 WORKDIR /home/frappe/frappe-bench
-RUN bench get-app --branch version-16 --skip-assets https://github.com/frappe/payments && git -C apps/payments fetch origin cca07d9f9392e2ea0e521c5975151db9e4b6c321 && git -C apps/payments checkout cca07d9f9392e2ea0e521c5975151db9e4b6c321 && env/bin/pip install -e apps/payments
+RUN bench get-app --branch version-16 --skip-assets https://github.com/frappe/payments && git -C apps/payments fetch upstream cca07d9f9392e2ea0e521c5975151db9e4b6c321 && git -C apps/payments checkout cca07d9f9392e2ea0e521c5975151db9e4b6c321 && test "$(git -C apps/payments rev-parse HEAD)" = cca07d9f9392e2ea0e521c5975151db9e4b6c321 && env/bin/pip install -e apps/payments
 COPY --chown=frappe:frappe . apps/lms
 RUN cp -a apps/lms/apps/bpo_coach apps/bpo_coach && env/bin/pip install -e apps/lms -e apps/bpo_coach && printf 'frappe\npayments\nlms\nbpo_coach\n' > sites/apps.txt && python apps/lms/deploy/apply_bridge.py && cd apps/lms && yarn install --frozen-lockfile
 RUN cd apps/bpo_coach/frontend && npm ci && npm run build

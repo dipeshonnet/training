@@ -16,6 +16,8 @@ Continue with the CI results for this milestone, then the remaining native acces
 
 CI for `89443a9fac468f9a73081800a706bbc34df421f5`: the Linux Python 3.14/custom frontend job passed all 25 checks, including real symlink materialization. The first Docker build failed because Bench tried to configure host cron (`/usr/bin/crontab` is absent). Added Bench 5.29.1's supported `--no-backups` option; the dedicated encrypted-backup work remains outstanding. Docker must be rerun after this correction. Native frontend CI is still pending.
 
+The same milestone's patched native frontend subsequently passed 1,571 tests across 153 files and its production build. The second Docker run got past Bench initialization and failed at the Payments fetch: Bench names its remote `upstream`, not `origin`. Corrected the remote and added an explicit Payments SHA check; Docker verification remains pending the next run.
+
 This commit preserves implementation work so development can continue on a working Docker host. **Do not treat it as a completed, secure or deployable release.** No site has been initialized, no training data migrated, no Cloudflare Tunnel configured, no GHCR image published, and no verified release tag created.
 
 The upstream LMS code is based on the released `v2.66.0` tag, not the previous development fork. Existing `develop` history remains separate. Work is on `ai-coach-v2` in `https://github.com/dipeshonnet/training`.

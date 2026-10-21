@@ -69,6 +69,7 @@ jobs:
           PRIVATE_PROBE_URL=$(python -c 'import json,sys; print(json.load(sys.stdin)["file_url"])' <<< "$private_file")
           PUBLIC_PROBE_URL=$(python -c 'import json,sys; print(json.load(sys.stdin)["file_url"])' <<< "$public_file")
           export PRIVATE_PROBE_URL PUBLIC_PROBE_URL
+          printf 'PRIVATE_PROBE_URL=%s\nPUBLIC_PROBE_URL=%s\n' "$PRIVATE_PROBE_URL" "$PUBLIC_PROBE_URL" >> "$GITHUB_ENV"
           python deploy/smoke_http.py
       - name: Repeat initialization and verify restart recovery
         run: |
@@ -76,6 +77,9 @@ jobs:
           docker compose -f deploy/compose.yaml restart backend worker scheduler websocket frontend
           docker compose -f deploy/compose.yaml up --no-build -d --wait --wait-timeout 120
           curl --fail --silent --show-error -H "Host: $SITE_HOSTNAME" http://127.0.0.1:8080/api/method/ping
+          python deploy/smoke_http.py
+      - name: Verify Nginx recovery after a backend address change
+        run: python deploy/smoke_dns.py
       - name: Run custom app integration tests on the pinned stack
         run: |
           docker compose -f deploy/compose.yaml exec -T backend bench --site "$SITE_HOSTNAME" set-config allow_tests true

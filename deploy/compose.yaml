@@ -75,9 +75,17 @@ services:
       dockerfile: deploy/Dockerfile
       target: frontend
     restart: unless-stopped
+    environment:
+      SITE_HOSTNAME: ${SITE_HOSTNAME:-training.everydayai.work}
     ports: ['${HTTP_BIND:-127.0.0.1}:${HTTP_PORT:-8080}:8080']
     volumes: [sites:/home/frappe/frappe-bench/sites:ro]
     depends_on: [backend, websocket]
+    healthcheck:
+      test: [CMD-SHELL, 'wget -q -T 5 -O /dev/null --header="Host: $$SITE_HOSTNAME" http://127.0.0.1:8080/api/method/ping']
+      interval: 10s
+      timeout: 7s
+      retries: 12
+      start_period: 15s
   tunnel:
     image: cloudflare/cloudflared:2026.10.0@sha256:9b49eed8f62806d5d45ddf59ecefb5710429598ea6d3fcccd2af938f621b2b07
     profiles: [online]

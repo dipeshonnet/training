@@ -18,6 +18,8 @@ Updated: 21 October 2026 (Asia/Kolkata).
 
 Next: inspect Docker CI for the schema fix, finish installation/HTTP/restart/native test gates, then continue the native access-control and feature gates below. A passing image build or unit suite is not a verified release.
 
+Docker CI at `8e4896a8c` passed image builds, full initialization/migration, backend health and native/custom assets served through Nginx. Its file probe stopped during fixture setup because Frappe's `save_file` requires explicit `dt` and `dn`; corrected both to `null`. HTTP login/private-file probes, restart and native tests remain unverified. Added BuildKit layer caching for subsequent CI runs. Custom integration tests run on the restricted training site; upstream native LMS tests run on an isolated baseline site without BPO hooks, whose guest-access policy intentionally differs from upstream.
+
 This commit preserves implementation work so development can continue on a working Docker host. **Do not treat it as a completed, secure or deployable release.** No site has been initialized, no training data migrated, no Cloudflare Tunnel configured, no GHCR image published, and no verified release tag created.
 
 The upstream LMS code is based on the released `v2.66.0` tag, not the previous development fork. Existing `develop` history remains separate. Work is on `ai-coach-v2` in `https://github.com/dipeshonnet/training`.

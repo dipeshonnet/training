@@ -5,6 +5,11 @@ on:
     paths:
       - 'deploy/**'
       - 'apps/bpo_coach/**'
+      - 'frontend/**'
+      - 'lms/**'
+      - 'pyproject.toml'
+      - 'yarn.lock'
+      - '.dockerignore'
       - '.github/workflows/ai-coach-docker.yml'
   workflow_dispatch:
 permissions:

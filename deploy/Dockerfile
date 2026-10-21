@@ -7,7 +7,7 @@ COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
 RUN ln -s ../lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm && ln -s ../lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx && npm install -g yarn@1.22.22 && pip install --no-cache-dir frappe-bench==5.29.1 && useradd -m -u 1000 -s /bin/bash frappe
 USER frappe
 WORKDIR /home/frappe
-RUN bench init --frappe-branch v16.52.0 --python /usr/local/bin/python3 --skip-assets --skip-redis-config-generation frappe-bench && test "$(git -C frappe-bench/apps/frappe rev-parse HEAD)" = 4515014c87ece6cb20ee91d2cfb121c5cbd1ff4a
+RUN bench init --frappe-branch v16.52.0 --python /usr/local/bin/python3 --no-backups --skip-assets --skip-redis-config-generation frappe-bench && test "$(git -C frappe-bench/apps/frappe rev-parse HEAD)" = 4515014c87ece6cb20ee91d2cfb121c5cbd1ff4a
 WORKDIR /home/frappe/frappe-bench
 RUN bench get-app --branch version-16 --skip-assets https://github.com/frappe/payments && git -C apps/payments fetch origin cca07d9f9392e2ea0e521c5975151db9e4b6c321 && git -C apps/payments checkout cca07d9f9392e2ea0e521c5975151db9e4b6c321 && env/bin/pip install -e apps/payments
 COPY --chown=frappe:frappe . apps/lms

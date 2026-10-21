@@ -14,6 +14,8 @@ Updated: 21 October 2026 (Asia/Kolkata).
 
 Continue with the CI results for this milestone, then the remaining native access-control and feature gates below. No public deployment or verified release is authorized by a successful unit test run alone.
 
+CI for `89443a9fac468f9a73081800a706bbc34df421f5`: the Linux Python 3.14/custom frontend job passed all 25 checks, including real symlink materialization. The first Docker build failed because Bench tried to configure host cron (`/usr/bin/crontab` is absent). Added Bench 5.29.1's supported `--no-backups` option; the dedicated encrypted-backup work remains outstanding. Docker must be rerun after this correction. Native frontend CI is still pending.
+
 This commit preserves implementation work so development can continue on a working Docker host. **Do not treat it as a completed, secure or deployable release.** No site has been initialized, no training data migrated, no Cloudflare Tunnel configured, no GHCR image published, and no verified release tag created.
 
 The upstream LMS code is based on the released `v2.66.0` tag, not the previous development fork. Existing `develop` history remains separate. Work is on `ai-coach-v2` in `https://github.com/dipeshonnet/training`.

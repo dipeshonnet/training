@@ -1,5 +1,5 @@
-FROM node:24-bookworm-slim AS node
-FROM python:3.14-slim-bookworm AS app
+FROM node:24-bookworm-slim@sha256:91acba91b842bec0bf7ea6f5e09c644c7ccad72c4996ed9616d861d1c7cd60d4 AS node
+FROM python:3.14-slim-bookworm@sha256:58b9cb2dde6dc8ca7cabd10942d9d01ead923811b191f259008942f7b402ca7e AS app
 ENV DEBIAN_FRONTEND=noninteractive PYTHONUNBUFFERED=1 PATH=/home/frappe/frappe-bench/env/bin:/usr/local/bin:$PATH
 RUN apt-get update && apt-get install -y --no-install-recommends git curl ca-certificates build-essential pkg-config libmariadb-dev mariadb-client libcairo2-dev libffi-dev libssl-dev libxml2-dev libxslt1-dev libjpeg-dev zlib1g-dev libpq-dev redis-tools openssl rsync ffmpeg wkhtmltopdf fontconfig fonts-dejavu-core && rm -rf /var/lib/apt/lists/*
 COPY --from=node /usr/local/bin/node /usr/local/bin/node
@@ -18,6 +18,6 @@ COPY --chown=frappe:frappe deploy/entrypoint.py /home/frappe/entrypoint.py
 ENTRYPOINT ["python", "/home/frappe/entrypoint.py"]
 CMD ["web"]
 
-FROM nginx:1.28-alpine AS frontend
+FROM nginx:1.28-alpine@sha256:a8b39bd9cf0f83869a2162827a0caf6137ddf759d50a171451b335cecc87d236 AS frontend
 COPY --from=app /home/frappe/assets-built /usr/share/nginx/html/assets
 COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf

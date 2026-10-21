@@ -10,6 +10,7 @@ def apply(root):
     patch=root/'deploy/patches/lms-ai-coach.patch'
     manifest=json.loads(patch.with_suffix('.json').read_text(encoding='utf-8'))
     states=set()
+    normalized={}
     for name, hashes in manifest.items():
         # Normalize Git's Windows checkout line endings, not source content.
         content=(root/name).read_text(encoding='utf-8').encode('utf-8')
@@ -18,8 +19,15 @@ def apply(root):
         if state is None:
             raise RuntimeError(f'Pinned LMS bridge source changed: {name}. Review before building.')
         states.add(state)
+        normalized[name]=content
     if len(states) != 1:
         raise RuntimeError('LMS bridge is only partially applied. Review before building.')
+    # Docker copies Windows checkouts verbatim. Git on Linux cannot match an
+    # LF patch against CRLF files, even though their normalized hashes match.
+    # Only normalize after every source has passed the pin and state checks.
+    for name, content in normalized.items():
+        if (root/name).read_bytes() != content:
+            (root/name).write_bytes(content)
     check=subprocess.run(['git','apply','--check',str(patch)],cwd=root,capture_output=True)
     if check.returncode:
         reverse=subprocess.run(['git','apply','--reverse','--check',str(patch)],cwd=root,capture_output=True)

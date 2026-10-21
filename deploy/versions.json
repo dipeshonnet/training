@@ -7,6 +7,10 @@
     "payments": {"repository": "https://github.com/frappe/payments", "branch": "version-16", "commit": "cca07d9f9392e2ea0e521c5975151db9e4b6c321"}
   },
   "runtime": {"python": "3.14", "node": "24", "mariadb": "11.8", "redis": "7", "bench": "5.29.1"},
-  "image_digests": {},
+  "image_digests": {
+    "node:24-bookworm-slim": "sha256:91acba91b842bec0bf7ea6f5e09c644c7ccad72c4996ed9616d861d1c7cd60d4",
+    "python:3.14-slim-bookworm": "sha256:58b9cb2dde6dc8ca7cabd10942d9d01ead923811b191f259008942f7b402ca7e",
+    "nginx:1.28-alpine": "sha256:a8b39bd9cf0f83869a2162827a0caf6137ddf759d50a171451b335cecc87d236"
+  },
   "release_status": "development-unverified"
 }

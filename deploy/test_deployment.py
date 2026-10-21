@@ -49,6 +49,17 @@ class BridgePatch(unittest.TestCase):
             apply(self.root)
         self.assertNotIn('ai_coach: AICoach', (self.root / 'frontend/src/utils/index.js').read_text())
 
+    def test_windows_checkout_applies_on_linux_and_is_repeatable(self):
+        manifest = json.loads((self.root / 'deploy/patches/lms-ai-coach.json').read_text())
+        for name in manifest:
+            source = self.root / name
+            source.write_bytes(source.read_bytes().replace(b'\n', b'\r\n'))
+        apply(self.root)
+        apply(self.root)
+        for name in manifest:
+            self.assertNotIn(b'\r\n', (self.root / name).read_bytes())
+        self.assertIn('ai_coach: AICoach', (self.root / 'frontend/src/utils/index.js').read_text())
+
     def test_rejects_partial_patch(self):
         apply(self.root)
         name = 'frontend/src/routes.js'

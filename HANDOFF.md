@@ -2,6 +2,14 @@
 
 Updated: 21 October 2026 (Asia/Kolkata).
 
+### People CSV import — 22 October 2026
+
+Learning operations now includes **People & access: import CSV** for administrators and trainers, with a downloadable template and per-row results. The server endpoint is `bpo_coach.people_import.import_people` (POST, authenticated staff only). Files are limited to 500 KB and 100 people, matched by normalized email. Headers are `name,email,password,role,batchIds`; roles are `learner`, `trainer`, and `admin`. Passwords are required only for new accounts. Blank roles preserve existing roles; batch IDs separated by semicolons add memberships without removing existing ones.
+
+Trainers can manage ordinary learner accounts only. Existing learners must have all batch memberships in the trainer's assigned processes. New learners need an accessible batch; native LMS enrollment also requires the trainer to be an instructor or evaluator for that batch. Administrator role changes replace managed BPO/LMS role pairs and remove stale trainer process access. Importing does not grant old assignments to new batch members.
+
+Rows use database savepoints and discard queued transaction callbacks on failure, so a native validation failure cannot leave a newly created account behind. Errors do not expose passwords or framework exception details. Verification includes CSV parser tests, Vue component tests and real Frappe integration tests in `bpo_coach.tests.test_people_import`. No schema migration is required. This feature does not close the broader public rollout gates below.
+
 ## Status: local Docker verification; public deployment gates remain open
 
 The site has been initialized locally at `127.0.0.1:8080` with canonical Host `training.everydayai.work`. MariaDB, Redis, backend, workers, scheduler, websocket and Nginx run under Compose project `ai-coach-v2`. Docker Desktop is working on this Windows host. Local credentials are private in ignored `deploy/.env`; database/site volumes contain disposable verification data only. No real training data has been migrated, public tunnel configured, release image published or verified release tag created.

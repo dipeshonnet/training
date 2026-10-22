@@ -1,6 +1,7 @@
 <template>
   <div class="page-title"><div><p class="eyebrow">LEARNING OPERATIONS</p><h1>People, processes and assignments</h1></div></div>
   <div class="cards">
+    <PeopleImport v-if="identity.staff || identity.admin" :identity="identity" :batches="workspace.batches" @changed="emit('changed')" />
     <form v-if="identity.admin" class="card" @submit.prevent="perform('client',{title:client})"><h2>Add a client</h2><label>Client name<input required v-model="client"></label><button :disabled="busy">Create client</button></form>
     <form v-if="identity.admin" class="card" @submit.prevent="perform('process',process)"><h2>Add a process</h2><label>Name<input required v-model="process.title"></label><label>Client<select required v-model="process.client"><option v-for="c in workspace.clients" :key="c.name" :value="c.name">{{ c.title }}</option></select></label><button :disabled="busy">Create process</button></form>
     <form v-if="identity.admin" class="card" @submit.prevent="perform('user',user)"><h2>Create an account</h2><label>Name<input required v-model="user.name"></label><label>Email<input required type="email" v-model="user.email"></label><label>Temporary password<input required type="password" minlength="12" autocomplete="new-password" v-model="user.password"></label><label>Role<select v-model="user.role"><option value="learner">Learner</option><option value="trainer">Trainer</option><option value="admin">Administrator</option></select></label><button :disabled="busy">Create account</button></form>
@@ -22,6 +23,7 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { api, requestId } from '../lib/api'
+import PeopleImport from './PeopleImport.vue'
 defineProps(['workspace','identity']); const emit=defineEmits(['changed','error'])
 const busy=ref(false), message=ref(''), client=ref('')
 const process=reactive({title:'',client:''}),user=reactive({name:'',email:'',password:'',role:'learner'}),access=reactive({member:'',process:''}),batch=reactive({title:'',process:'',start_date:'',end_date:''}),membership=reactive({member:'',batch:''}),course=reactive({title:'',process:'',description:'',company_wide:false})

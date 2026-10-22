@@ -2,12 +2,12 @@ export class ApiError extends Error {
   constructor(message: string, public status: number) { super(message) }
 }
 
-export async function api(method: string, data: Record<string, unknown> = {}) {
+export async function api(method: string, data: Record<string, unknown> = {}, namespace = 'bpo_coach.api') {
   let body: BodyInit
   const headers: Record<string, string> = {'X-Frappe-CSRF-Token': (window as any).bpoCoachBoot?.csrf_token || ''}
   if (data instanceof FormData) body = data
   else { headers['Content-Type'] = 'application/json'; body = JSON.stringify(data) }
-  const response = await fetch('/api/method/bpo_coach.api.' + method, {method: 'POST', headers, body, credentials: 'same-origin'})
+  const response = await fetch('/api/method/' + namespace + '.' + method, {method: 'POST', headers, body, credentials: 'same-origin'})
   if (response.status === 401 || response.status === 403) {
     if (response.status === 401) window.location.assign('/login?redirect-to=' + encodeURIComponent(location.pathname + location.search))
   }
